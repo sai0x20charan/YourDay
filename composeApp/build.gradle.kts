@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
+    alias(libs.plugins.mikepenz.aboutlibrary.android)
 
 }
 
@@ -45,21 +46,23 @@ kotlin {
             implementation(libs.decompose.jetbrains)
             implementation(libs.decompose.jetbrains.experiment)
             implementation(libs.androidx.core.splashscreen)
-            implementation (libs.aboutlibraries.core)
-            implementation(libs.aboutlibraries.compose.m3)
             implementation (libs.androidx.graphics.shapes)
             implementation(libs.material3)
             implementation(libs.firebase.crashlytics)
             debugImplementation(libs.ui.tooling)
+            implementation (libs.aboutlibraries.core)
+            implementation(libs.aboutlibraries.compose.m3)
 
 
         }
     }
 }
 
+
 android {
     namespace = "com.charan.yourday"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
+
 
     defaultConfig {
         applicationId = "com.charan.yourday"
@@ -78,6 +81,7 @@ android {
             isMinifyEnabled = false
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

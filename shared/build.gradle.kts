@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.buildKonfig)
     alias(libs.plugins.skie)
-    alias(libs.plugins.mikepenz.aboutlibrary)
+//    alias(libs.plugins.mikepenz.aboutlibrary)
 }
 
 kotlin {

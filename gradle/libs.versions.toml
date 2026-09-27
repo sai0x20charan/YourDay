@@ -48,7 +48,7 @@ essenty = "2.5.0"
 richeditorCompose = "1.0.0-rc13"
 runtime = "1.10.0"
 skie = "0.10.9"
-aboutlibrariesCore = "11.2.3"
+aboutlibrariesCore = "14.0.0-b02"
 firebaseCrashlytics = "20.0.4"
 googleGmsGoogleServices = "4.4.4"
 googleFirebaseCrashlytics = "3.0.3"
@@ -132,6 +132,7 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
 skie = {id = "co.touchlab.skie", version.ref = "skie"}
 mikepenz-aboutlibrary = {id = "com.mikepenz.aboutlibraries.plugin",version.ref = "aboutlibrariesCore"}
+mikepenz-aboutlibrary-android = {id = "com.mikepenz.aboutlibraries.plugin.android",version.ref = "aboutlibrariesCore"}
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 

@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.google.gms.google.services) apply false
     alias(libs.plugins.google.firebase.crashlytics) apply false
     alias(libs.plugins.androidLibrary) apply false
+    alias(libs.plugins.mikepenz.aboutlibrary) apply false
+    alias(libs.plugins.mikepenz.aboutlibrary.android) apply false
     alias(libs.plugins.multiplatformResources) apply false
 }
 
