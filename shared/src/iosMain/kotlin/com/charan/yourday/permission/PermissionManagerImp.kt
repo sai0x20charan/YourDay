@@ -22,24 +22,25 @@ class PermissionManagerImp : PermissionManager {
     private var location = CLLocationManager()
     private var calenderPermission = MutableStateFlow(false)
 
-    override fun isPermissionGranted(permissions: Permissions): Boolean {
+    override fun isPermissionGranted(permissions: PermissionType): Boolean {
         return when (permissions) {
-            Permissions.CALENDER -> {
+            PermissionType.CALENDER -> {
+                store = EKEventStore()
                 val status = EKEventStore.authorizationStatusForEntityType(EKEntityType.EKEntityTypeEvent)
                 val isGranted = status == EKAuthorizationStatusAuthorized || status == EKAuthorizationStatusFullAccess
                 isGranted
             }
 
-            Permissions.LOCATION -> {
+            PermissionType.LOCATION -> {
                 location.locationServicesEnabled()
             }
         }
     }
 
-    override fun requestPermission(permissions: Permissions) {
+    override fun requestPermission(permissions: PermissionType) {
         when(permissions){
 
-            Permissions.CALENDER -> {
+            PermissionType.CALENDER -> {
                 store.requestFullAccessToEventsWithCompletion { isgranted, nsError ->
                     if(isgranted){
                         calenderPermission.tryEmit(true)
@@ -49,7 +50,7 @@ class PermissionManagerImp : PermissionManager {
                     }
                 }
             }
-            Permissions.LOCATION -> {
+            PermissionType.LOCATION -> {
                 val status = CLLocationManager.authorizationStatus()
                 when(status){
                     kCLAuthorizationStatusAuthorized -> {
@@ -65,7 +66,7 @@ class PermissionManagerImp : PermissionManager {
         }
     }
 
-    override fun requestMultiplePermissions(permissions: List<Permissions>) {
+    override fun requestMultiplePermissions(permissions: List<PermissionType>) {
         permissions.forEach {
             requestPermission(it)
         }

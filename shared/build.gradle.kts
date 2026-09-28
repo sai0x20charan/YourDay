@@ -1,27 +1,23 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.codingfeline.buildkonfig.compiler.FieldSpec
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
-    id("dev.icerock.mobile.multiplatform-resources")
+    alias(libs.plugins.androidKMP)
+    alias(libs.plugins.multiplatformResources)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.buildKonfig)
     alias(libs.plugins.skie)
-    alias(libs.plugins.mikepenz.aboutlibrary)
+//    alias(libs.plugins.mikepenz.aboutlibrary)
 }
 
 kotlin {
 
-    androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
+    androidLibrary {
+        namespace = "com.charan.yourday.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -33,6 +29,8 @@ kotlin {
             export(libs.graphics)
             export(libs.decompose)
             export(libs.essenty.lifecycle)
+            linkerOpts("-framework", "CoreML")
+
         }
     }
     
@@ -45,8 +43,9 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.encoding)
             api(libs.resources)
-            implementation(libs.kotlinx.datetime)
+            api(libs.kotlinx.datetime)
             api(libs.koin.core)
+            api(libs.graphics)
             implementation(libs.koin.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.napier)
@@ -60,6 +59,13 @@ kotlin {
             api(libs.essenty.lifecycle)
             api(libs.essenty.stateKeeper)
             api(libs.essenty.instanceKeeper)
+            api("com.splendo.kaluga:base-permissions:1.6.0")
+            api("com.splendo.kaluga:calendar-permissions:1.6.0")
+            api("com.splendo.kaluga:location-permissions:1.6.0")
+            api("com.cactuscompute:cactus:1.4.1-beta")
+
+
+
 
             // put your Multiplatform dependencies here
         }
@@ -68,28 +74,18 @@ kotlin {
             implementation(libs.koin.android)
             implementation (libs.play.services.location)
             implementation (libs.accompanist.permissions)
+            implementation(libs.androidx.compose.runtime)
+            implementation(libs.androidx.compose.ui)
+            api(libs.a2ui.material3)
+            implementation(libs.a2ui.model)
+            implementation(libs.a2ui.engine)
+            api("io.github.sanchitmonga22:runanywhere-llamacpp:0.20.27")
+            api("io.github.sanchitmonga22:runanywhere-sdk:0.20.27")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
 
         }
-    }
-}
-
-
-android {
-    namespace = "com.charan.yourday.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-
-    }
-    buildFeatures {
-        buildConfig=true
     }
 }
 multiplatformResources {
@@ -120,5 +116,3 @@ buildkonfig {
 
     }
 }
-
-

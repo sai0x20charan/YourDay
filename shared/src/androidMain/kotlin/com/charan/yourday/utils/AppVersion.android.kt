@@ -1,8 +1,6 @@
 package com.charan.yourday.utils
 
 import android.content.Context
-import android.os.Build
-import com.charan.yourday.shared.BuildConfig
 import com.charan.yourday.utils.OpenURL.getKoin
 
 actual fun appVersion(): String {

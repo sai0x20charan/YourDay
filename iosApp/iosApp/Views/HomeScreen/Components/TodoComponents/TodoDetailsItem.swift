@@ -10,18 +10,18 @@ import SwiftUI
 import Shared
 
 struct TodoDetailsItem: View {
-    @State var todoData: Shared.TodoData
+    @State var todoData: Shared.TodoDataState
     var onTodoOpen: ((_ url : String) -> Void )
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment : .firstTextBaseline) {
                 
-                if let attributedString = try? AttributedString(markdown: todoData.tasks ?? "") {
+                if let attributedString = try? AttributedString(markdown: todoData.taskName ?? "") {
                     Text(attributedString)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
-                    Text(todoData.tasks ?? "")
+                    Text(todoData.taskName ?? "")
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
@@ -32,7 +32,7 @@ struct TodoDetailsItem: View {
             }
 
             HStack {
-                if let logo = todoData.todoProviderLogo {
+                if let logo = todoData.todoImage {
                     Image(resource: logo)
                         .resizable()
                         .frame(width: 20, height: 20)
@@ -50,27 +50,17 @@ struct TodoDetailsItem: View {
                 
                 Spacer()
 
-                Text(formattedDate)
+                Text(todoData.date ?? "Unknown Date")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
         }
         .padding(.vertical, 4)
         .onTapGesture {
-            if let link = todoData.taskLink {
-                onTodoOpen(link)
-            }
+                onTodoOpen(todoData.taskLink)
+            
         }
         Divider()
     }
 
-    var formattedDate: String {
-        if let dueTime = todoData.dueTime {
-            return DateUtils().convertToMMMDYYYYWithTime(dueTime)
-        } else if let dueDate = todoData.dueDate {
-            return DateUtils().convertToMMMDYYYY(dueDate)
-        } else {
-            return ""
-        }
-    }
 }

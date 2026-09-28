@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct WeatherDetailView: View {
-    let weatherData: Shared.WeatherData
+    let weatherData: Shared.CurrentWeatherState
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -20,14 +20,14 @@ struct WeatherDetailView: View {
                 
                 Spacer()
                 
-                if let iconName = weatherData.temperatureIcon {
+                if let iconName = weatherData.icon {
                     Image(resource: iconName)
                         .resizable()
                         .frame(width: 24, height: 24)
                 }
             }
             
-            Text("\(weatherData.currentTemperature?.description ?? "--")")
+            Text(String(weatherData.temp))
                 .font(.title)
                 .fontWeight(.bold)
             

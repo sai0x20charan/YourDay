@@ -11,6 +11,8 @@ import CoreLocation
 import EventKit
 import Shared
 import UIKit
+import PermissionsKit
+import CalendarPermission
 
 class PermissionObserver: NSObject, ObservableObject, CLLocationManagerDelegate{
     private var locationManager = CLLocationManager()
@@ -55,13 +57,13 @@ class PermissionObserver: NSObject, ObservableObject, CLLocationManagerDelegate{
     }
     
     func checkCalendarPermission() {
-        let status = EKEventStore.authorizationStatus(for: .event)
-        print(status.rawValue)
+        
+        let status = Permission.calendar(access: .full).status
         switch status {
-        case .authorized, .fullAccess:
+        case .authorized:
             print("Calender Permission Is given")
             calendarPermission = .granted
-        case .denied, .restricted:
+        case .denied:
             print("Calender Permission Is not given")
             calendarPermission = .notGranted
         case .notDetermined:

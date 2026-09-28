@@ -5,8 +5,8 @@ import com.charan.yourday.MR
 import dev.icerock.moko.resources.ImageResource
 
 actual object WeatherIconName {
-    actual fun weatherIcon(code: String,isDay : Boolean): ImageResource? {
-        val iconName = weatherIconsMap.entries.find { it.key.toString() == code }?.value
+    actual fun weatherIcon(code: Int,isDay : Boolean): ImageResource? {
+        val iconName = weatherIconsMap.entries.find { it.key == code }?.value
         return if(isDay) iconName?.first else iconName?.second
     }
 }

@@ -1,65 +1,75 @@
 [versions]
 accompanistMarkdown = "0.5.6"
-accompanistPermissions = "0.31.1-alpha"
-agp = "8.11.1"
-android-compileSdk = "36"
-android-minSdk = "24"
-android-targetSdk = "36"
+accompanistPermissions = "0.37.3"
+agp = "9.1.0"
+android-compileSdk = "37"
+android-minSdk = "26"
+android-targetSdk = "37"
 androidx-activityCompose = "1.9.3"
-androidx-appcompat = "1.7.0"
+androidx-appcompat = "1.7.1"
 androidx-constraintlayout = "2.2.0"
-androidx-core-ktx = "1.15.0"
-androidx-espresso-core = "3.6.1"
-androidx-lifecycle = "2.8.4"
-androidx-material = "1.12.0"
-androidx-test-junit = "1.2.1"
-compose-multiplatform = "1.9.0-beta01"
-coreSplashscreen = "1.0.1"
-graphicsShapes = "1.0.1"
+androidx-core-ktx = "1.17.0"
+androidx-espresso-core = "3.7.0"
+androidx-lifecycle = "2.9.6"
+androidx-material = "1.13.0"
+androidx-test-junit = "1.3.0"
+componentsResources = "1.10.0"
+compose-multiplatform = "1.10.0"
+a2ui = "1.0.0-alpha01"
+coreSplashscreen = "1.2.0"
+foundation = "1.10.0"
+grantCore = "1.0.1"
+graphicsShapes = "1.1.0"
 junit = "4.13.2"
-kotlin = "2.1.0"
+kotlin = "2.3.0"
 kotlinGradlePlugin = "1.9.0"
-kotlinxCoroutinesCore = "1.10.1"
-landscapistCoil3 = "2.4.7"
-multiplatformMarkdownRendererM3 = "0.30.0"
+kotlinxCoroutinesCore = "1.10.2"
+landscapistCoil3 = "2.9.3"
+material = "1.10.0"
+material3 = "1.11.0-alpha02"
+materialIconsExtended = "1.7.3"
+multiplatformMarkdownRendererM3 = "0.39.2"
 napier = "2.7.1"
-permissions = "0.19.1"
+permissions = "0.20.1"
 playServicesLocation = "21.3.0"
-resourcesGenerator = "0.24.4"
-graphics = "0.9.0"
-datetime = "0.6.1"
-coreI18n = "1.0.0-alpha01"
-ktor-client = "3.1.0"
-buildKonfig = "0.15.2"
-koin = "4.0.1"
-koinComposeMultiplatform = "4.0.1"
-navigationCompose = "2.8.6"
-lifecycleViewModel = "2.8.7"
-kotlinxSerializationJson = "1.8.0"
-datastore = "1.1.3"
-decompose = "3.2.0"
-essenty = "2.2.0"
-richeditorCompose = "1.0.0-rc10"
-skie = "0.10.1"
-aboutlibrariesCore = "11.2.3"
-firebaseCrashlytics = "19.4.1"
-googleGmsGoogleServices = "4.4.2"
+resourcesGenerator = "0.26.0"
+graphics = "0.10.1"
+datetime = "0.7.1"
+coreI18n = "1.0.0"
+ktor-client = "3.4.0"
+buildKonfig = "0.17.1"
+koin = "4.1.1"
+koinComposeMultiplatform = "4.1.1"
+navigationCompose = "2.9.7"
+lifecycleViewModel = "2.10.0"
+kotlinxSerializationJson = "1.10.0"
+datastore = "1.2.0"
+decompose = "3.4.0"
+essenty = "2.5.0"
+richeditorCompose = "1.0.0-rc13"
+runtime = "1.10.0"
+skie = "0.10.9"
+aboutlibrariesCore = "14.0.0-b02"
+firebaseCrashlytics = "20.0.4"
+googleGmsGoogleServices = "4.4.4"
 googleFirebaseCrashlytics = "3.0.3"
+uiToolingPreview = "1.10.0"
 
 
 [libraries]
-accompanist-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "accompanistMarkdown" }
+
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+androidx-compose-runtime = { module = "androidx.a2ui.compose:compose-runtime", version.ref = "a2ui" }
+androidx-compose-ui = { module = "androidx.a2ui.compose:compose-ui", version.ref = "a2ui" }
+a2ui-material3 = { module = "androidx.compose.material3:material3-a2ui", version.ref = "a2ui" }
+a2ui-model = { module = "androidx.a2ui:a2ui-model", version.ref = "a2ui" }
+a2ui-engine = { module = "androidx.a2ui:a2ui-engine", version.ref = "a2ui" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-graphics-shapes = { module = "androidx.graphics:graphics-shapes", version.ref = "graphicsShapes" }
+components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "componentsResources" }
+foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundation" }
+grant-core = { module = "dev.brewkits:grant-core", version.ref = "grantCore" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
-androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso-core" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
@@ -67,6 +77,9 @@ androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", nam
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 landscapist-coil3 = { module = "com.github.skydoves:landscapist-coil3", version.ref = "landscapistCoil3" }
+material = { module = "org.jetbrains.compose.material:material", version.ref = "material" }
+material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 multiplatform-markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "multiplatformMarkdownRendererM3" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 permissions = { module = "dev.icerock.moko:permissions", version.ref = "permissions" }
@@ -107,11 +120,16 @@ richeditor-compose = { module = "com.mohamedrejeb.richeditor:richeditor-compose"
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibrariesCore" }
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutlibrariesCore" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
+runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "runtime" }
+ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "uiToolingPreview" }
+ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "uiToolingPreview" }
+ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
+androidKMP = {id = "com.android.kotlin.multiplatform.library", version.ref = "agp"}
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -120,5 +138,7 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
 skie = {id = "co.touchlab.skie", version.ref = "skie"}
 mikepenz-aboutlibrary = {id = "com.mikepenz.aboutlibraries.plugin",version.ref = "aboutlibrariesCore"}
+mikepenz-aboutlibrary-android = {id = "com.mikepenz.aboutlibraries.plugin.android",version.ref = "aboutlibrariesCore"}
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
+

@@ -1,6 +1,6 @@
 package com.charan.yourday.permission
 
-enum class Permissions {
+enum class PermissionType {
     CALENDER,
     LOCATION
 }

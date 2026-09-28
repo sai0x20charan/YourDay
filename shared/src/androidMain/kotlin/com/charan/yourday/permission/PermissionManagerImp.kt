@@ -20,18 +20,18 @@ class PermissionManagerImp(
     companion object {
         private const val PERMISSION_CODE = 1001
     }
-    override fun isPermissionGranted(permissions: Permissions): Boolean {
+    override fun isPermissionGranted(permissions: PermissionType): Boolean {
         return ContextCompat.checkSelfPermission(
             context,getPlatformPermission(permissions)
         ) == PackageManager.PERMISSION_GRANTED
 
     }
 
-    override fun requestPermission(permissions: Permissions)  {
+    override fun requestPermission(permissions: PermissionType)  {
 
     }
 
-    override fun requestMultiplePermissions(permissions: List<Permissions>) {
+    override fun requestMultiplePermissions(permissions: List<PermissionType>) {
 
 
     }
@@ -50,10 +50,10 @@ class PermissionManagerImp(
 
     }
 
-    private fun getPlatformPermission(permissions: Permissions) : String {
+    private fun getPlatformPermission(permissions: PermissionType) : String {
         return when(permissions) {
-            Permissions.CALENDER -> Manifest.permission.READ_CALENDAR
-            Permissions.LOCATION -> Manifest.permission.ACCESS_FINE_LOCATION
+            PermissionType.CALENDER -> Manifest.permission.READ_CALENDAR
+            PermissionType.LOCATION -> Manifest.permission.ACCESS_FINE_LOCATION
         }
 
     }

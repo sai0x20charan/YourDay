@@ -13,6 +13,8 @@ import EventKit
 struct HomeScreenView: View {
     private let component: HomeScreenComponent
     @State private var homeState: Shared.HomeState?
+    @Environment(\.scenePhase) private var scenePhase
+
 
     @ObservedObject private var permissionObserver: PermissionObserver = .init()
     @State private var permissionState: PermissionState?
@@ -24,7 +26,6 @@ struct HomeScreenView: View {
 
     var body: some View {
         NavigationView {
-            
             ScrollView {
                 LazyVStack() {
                     VStack(alignment: .leading) {
@@ -36,6 +37,21 @@ struct HomeScreenView: View {
                     }
                     .frame(maxWidth: .infinity,alignment: .leading)
                     .padding()
+                    
+                    if (homeState?.aiResponseState.isModelDownloaded == true) {
+                        if let aiState = homeState?.aiResponseState {
+                            AIResponseCard(
+                                thinkingResponse: aiState.thinkingResponse ?? "",
+                                aiResponse: aiState.aiResponse ?? "",
+                                isThinking : aiState.isThinking,
+                                showThinking: aiState.showThinkingResponse,
+                                onExpandToggle: {
+                                    component.onEvent(intent: HomeEventOnToggleThinkingResponse())
+                                }                              
+                                
+                            )
+                        }
+                    }
                     
                     WeatherCard(
                         weatherState: Binding(
@@ -93,15 +109,15 @@ struct HomeScreenView: View {
             .refreshable {
                 component.onEvent(intent: HomeEventRefreshData.shared)
             }
+            .onAppear {
+                observeState()
+                observePermissionRequest()
+                checkAndGenerateIfNeeded()
+            }
 
-
-            
-        
-        .onAppear {
-            observeState()
-            observePermissionRequest()
-            
-        }
+            .onChange(of: homeState?.aiResponseState.isModelDownloaded) { _ in
+                checkAndGenerateIfNeeded()
+            }
         .onReceive(permissionObserver.$locationPermission) { permissionState in
             switch permissionState {
             case .granted:
@@ -138,6 +154,11 @@ struct HomeScreenView: View {
                 }
             }
         }
+    }
+    
+    private func checkAndGenerateIfNeeded() {
+        guard homeState?.aiResponseState.isModelDownloaded == false else { return }
+        component.onEvent(intent: HomeEventOnGenerateAIResponse())
     }
     
     private func observeState() {

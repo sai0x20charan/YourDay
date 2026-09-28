@@ -27,11 +27,11 @@ struct WeatherCard: View {
                                 onGrant: { onLocationPermission() },
                                 title: "Please allow location permission to fetch weather data"
                             )
-                        }else if let weatherData = state.weatherData {
+                        }else if let weatherData = state.currentWeather {
                             WeatherDetailView(weatherData: weatherData)
-                            if let forecast = state.weatherData?.forecast{
-                                WeatherForecastItem(forecastData: forecast)
-                            }
+                            
+                                WeatherForecastItem(forecastData: state.forecastWeather)
+                            
                         } else {
                             Text("No weather data available")
                                 .foregroundColor(.gray)

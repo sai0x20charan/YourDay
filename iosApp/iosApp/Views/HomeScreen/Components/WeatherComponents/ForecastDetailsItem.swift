@@ -9,7 +9,7 @@ import SwiftUI
 import Shared
 
 struct WeatherForecastItem: View {
-    let forecastData: [WeatherData]
+    let forecastData: [ForecastWeatherState]
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -18,7 +18,7 @@ struct WeatherForecastItem: View {
                     VStack(alignment: .center, spacing: 5) {
                         Text(item.time ?? "")
                             .font(.body)
-                        if let temperatureIcon = item.temperatureIcon {
+                        if let temperatureIcon = item.icon {
                             Image(resource : temperatureIcon)
                                 .resizable()
                                 .frame(width: 24, height: 24)
@@ -26,15 +26,15 @@ struct WeatherForecastItem: View {
                         }
                         
                         
-                        if let currentTemperature = item.currentTemperature {
-                            Text(currentTemperature)
-                                .font(.body)
-                        }
                         
-                        if let currentCondition = item.currentCondition {
-                            Text(currentCondition)
+                        Text(String(item.temp))
+                                .font(.body)
+                        
+                        
+                        
+                            Text(item.condition)
                                 .font(.caption)
-                        }
+                        
                     }
                     .padding(8)
                     Divider()
