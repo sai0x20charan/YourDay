@@ -61,7 +61,11 @@ kotlin {
 
 android {
     namespace = "com.charan.yourday"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk {
+        version = release(libs.versions.android.compileSdk.get().toInt()){
+            minorApiLevel = 0
+        }
+    }
 
 
     defaultConfig {

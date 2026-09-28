@@ -123,9 +123,9 @@ fun SettingsScreen(
             item {
                 SectionHeader(title = "AI Model")
                 SettingItem(
-                    label = "qwen3-0.6",
+                    label = "Qwen3.5 2B Q4_K_M",
                     trailingContent = {
-                        if(state.isAIModelDownloaded){
+                        if (state.aiModelState.isModelDownloaded) {
                             IconButton(
                                 onClick = {
                                     component.onEvent(SettingsEvents.OnDeleteAIModel)
@@ -136,10 +136,9 @@ fun SettingsScreen(
                                     contentDescription = "Delete model",
                                     tint = Color.Red
                                 )
-
                             }
-                        } else{
-                            if(!(state.isAiModelDownloading)) {
+                        } else {
+                            if (!state.aiModelState.isModelDownloading) {
                                 IconButton(
                                     onClick = {
                                         component.onEvent(SettingsEvents.OnDownloadAIModel)
@@ -151,13 +150,13 @@ fun SettingsScreen(
                                         contentDescription = "Download model",
                                     )
                                 }
-                            } else{
+                            } else {
                                 LoadingIndicator()
                             }
                         }
                     }
                 )
-                 SectionDivider()
+                SectionDivider()
             }
 
             item {
@@ -180,9 +179,3 @@ fun SettingsScreen(
         }
     }
 }
-
-
-
-
-
-

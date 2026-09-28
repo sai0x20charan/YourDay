@@ -6,14 +6,16 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocalLLMRepository {
 
-    fun downloadModel(modelName : String = "qwen3-1.7-pro") : Flow<ProcessState<Boolean>>
+    suspend fun initModel(modelName: String = "lfm2.5-230m-q4_k_m")
 
-    suspend fun isModelDownloaded(modelName: String = "qwen3-1.7-pro") : Boolean
+    fun downloadModel(modelName: String = "lfm2.5-230m-q4_k_m"): Flow<ProcessState<Boolean>>
 
-     suspend fun generateDaySummary(
-        modelName: String = "qwen3-1.7-pro",
+    suspend fun isModelDownloaded(modelName: String = "lfm2.5-230m-q4_k_m"): Boolean
+
+    suspend fun generateDaySummary(
+        modelName: String = "lfm2.5-230m-q4_k_m",
         input: String
-     ) : Flow<ProcessState<AIResponse>>
+    ): Flow<ProcessState<AIResponse>>
 
-     suspend fun deleteModel(modelName: String = "qwen3-1.7-pro") : Flow<ProcessState<Boolean>>
+    suspend fun deleteModel(modelName: String = "lfm2.5-230m-q4_k_m"): Flow<ProcessState<Boolean>>
 }

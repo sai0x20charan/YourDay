@@ -3,6 +3,7 @@ package com.charan.yourday.presentation.home
 import android.Manifest
 import android.util.Log
 import android.widget.Toast
+import androidx.a2ui.model.processor.A2uiSurfaceModel
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -37,6 +38,7 @@ import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.a2ui.A2uiSurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -92,6 +94,8 @@ fun HomeScreen(
     }
 
     var showDropDown by remember { mutableStateOf(false) }
+
+    val surfaces by component.surfaces.collectAsState()
 
     LaunchedEffect(component.effects) {
         component.effects.collectLatest {
@@ -216,6 +220,15 @@ fun HomeScreen(
                         }
                     }
                     }
+                    if (surfaces.isNotEmpty()) {
+                        surfaces.forEach { surface ->
+                            A2uiSurface(
+                                surfaceModel = surface,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        Spacer(Modifier.padding(vertical = 15.dp))
+                    }
                     if(homeState.aiResponseState.isModelDownloaded) {
                         AIResponseCard(
                             thinkingResponse = homeState.aiResponseState.thinkingResponse ?: "",
@@ -227,7 +240,6 @@ fun HomeScreen(
                             },
                             isThinking = homeState.aiResponseState.isThinking
                         )
-                        Spacer(Modifier.padding(vertical = 15.dp))
                     }
 
                     WeatherCard(

@@ -23,7 +23,7 @@ class WeatherRepoImp(
     private val dataStoreRepo : DataStoreRepository
 ) : WeatherRepo {
     override suspend fun getCurrentWeatherInfo(lat: Double, long: Double): Flow<ProcessState<WeatherDTO?>> =flow{
-        emit(ProcessState.Loading)
+        emit(ProcessState.Loading())
         try {
             val response = apiService.getCurrentWeather(lat, long)
             print(response  )
@@ -50,7 +50,7 @@ class WeatherRepoImp(
 
 
     override suspend fun getCurrentForecast(lat: Double, long: Double): Flow<ProcessState<Boolean>> =flow {
-        emit(ProcessState.Loading)
+        emit(ProcessState.Loading())
         try {
             val response = apiService.getForecastWeather(lat, long)
             when (response.status) {

@@ -1,62 +1,47 @@
 package com.charan.yourday.data.network.responseDTO
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
 @Serializable
 data class TodoistTodayTasksResponseDTO(
-    val results: List<Result>,
+    val results: List<TodoistTaskDTO> = emptyList(),
     @SerialName("next_cursor")
-    val nextCursor: String?,
+    val nextCursor: String? = null,
 )
+
 @Serializable
-data class Result(
-    @SerialName("user_id")
-    val userId: String,
-    val id: String,
+data class TodoistTaskDTO(
+    val id: String = "",
+    val content: String = "",
+    val description: String = "",
+    @SerialName("is_completed")
+    val isCompleted: Boolean = false,
+    val due: Due? = null,
+    val priority: Long? = null,
     @SerialName("project_id")
-    val projectId: String,
+    val projectId: String? = null,
     @SerialName("section_id")
-    val sectionId: String?,
+    val sectionId: String? = null,
     @SerialName("parent_id")
-    val parentId: String?,
-    @SerialName("added_by_uid")
-    val addedByUid: String,
-    @SerialName("assigned_by_uid")
-    val assignedByUid: String?,
-    @SerialName("responsible_uid")
-    val responsibleUid: String?,
-    val labels: List<String>,
-    val deadline: String?,
-    val duration: String?,
-    val checked: Boolean,
-    @SerialName("is_deleted")
-    val isDeleted: Boolean,
-    @SerialName("added_at")
-    val addedAt: String,
-    @SerialName("completed_at")
-    val completedAt: String?,
-    @SerialName("completed_by_uid")
-    val completedByUid: String?,
+    val parentId: String? = null,
+    val url: String? = null,
+    @SerialName("created_at")
+    val createdAt: String? = null,
     @SerialName("updated_at")
-    val updatedAt: String,
-    val due: Due?,
-    val priority: Long,
-    @SerialName("child_order")
-    val childOrder: Long,
-    val content: String,
-    val description: String,
-    @SerialName("note_count")
-    val noteCount: Long,
-    @SerialName("day_order")
-    val dayOrder: Long,
-    @SerialName("is_collapsed")
-    val isCollapsed: Boolean,
+    val updatedAt: String? = null,
+    val labels: List<String> = emptyList(),
 )
+
+typealias Result = TodoistTaskDTO
+
 @Serializable
 data class Due(
-    val date: String,
-    val timezone: String?,
-    val string: String,
-    val lang: String,
+    val date: String = "",
+    val string: String? = null,
+    val lang: String? = null,
+    val datetime: String? = null,
+    val timezone: String? = null,
     @SerialName("is_recurring")
-    val isRecurring: Boolean,
+    val isRecurring: Boolean = false,
 )

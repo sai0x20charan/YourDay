@@ -77,20 +77,26 @@ class SettingsScreenComponent (
                 is ProcessState.Loading -> {
                     _settingsState.update {
                         it.copy(
-                            isAiModelDownloading = true
+                            aiModelState = it.aiModelState.copy(
+                                downloadProgress = processState.progress
+                            )
                         )
                     }
                 }
                 is ProcessState.Success -> {
                     _settingsState.update {
                         it.copy(
-                            isAiModelDownloading = false,
-                            isAIModelDownloaded = true
+                            aiModelState = it.aiModelState.copy(
+                                isModelDownloading = false,
+                                isModelDownloaded = true,
+                                downloadProgress = null
+                            )
                         )
                     }
                 }
 
                 is ProcessState.Error -> {
+
 
                 }
 
@@ -100,31 +106,7 @@ class SettingsScreenComponent (
     }
 
     private fun deleteAIModel() = coroutineScope.launch {
-        localLLMRepository.deleteModel().collectLatest { processState ->
-            when(processState){
-                is ProcessState.Loading -> {
-                    _settingsState.update {
-                        it.copy(
-                            isAiModelDownloading = true
-                        )
-                    }
-                }
-                is ProcessState.Success -> {
-                    _settingsState.update {
-                        it.copy(
-                            isAiModelDownloading = false,
-                            isAIModelDownloaded = false
-                        )
-                    }
-                }
 
-                is ProcessState.Error -> {
-
-                }
-
-                else -> {}
-            }
-        }
 
     }
 
@@ -182,7 +164,9 @@ class SettingsScreenComponent (
         val isDownloaded = localLLMRepository.isModelDownloaded()
         _settingsState.update {
             it.copy(
-                isAIModelDownloaded =  isDownloaded
+                aiModelState = it.aiModelState.copy(
+                    isModelDownloaded = isDownloaded
+                )
             )
         }
 

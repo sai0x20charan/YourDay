@@ -8,7 +8,6 @@ import com.charan.yourday.data.repository.LocalLLMRepository
 import com.charan.yourday.data.repository.TodoistRepo
 import com.charan.yourday.data.repository.WeatherRepo
 import com.charan.yourday.data.repository.impl.DataStoreRepositoryImpl
-import com.charan.yourday.data.repository.impl.LocalLLMRepositoryImpl
 import com.charan.yourday.data.repository.impl.TodoistImp
 import com.charan.yourday.data.repository.impl.WeatherRepoImp
 import com.charan.yourday.utils.UserPreferencesStore
@@ -35,8 +34,6 @@ import org.koin.dsl.module
                     this.registerCalendarPermissionIfNotRegistered()
                 }
         }
-
-        single <LocalLLMRepository>{ LocalLLMRepositoryImpl(get(),get()) }
 
         single <CactusLM>{ CactusLM() }
 

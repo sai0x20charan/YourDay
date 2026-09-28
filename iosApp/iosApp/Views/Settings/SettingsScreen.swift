@@ -40,7 +40,7 @@ struct SettingsScreen: View {
 
             // MARK: - AI
             Section("AI") {
-                LabeledContent("qwen3-0.6") {
+                LabeledContent("Qwen3.5 2B Q4_K_M") {
                     if state?.isAiModelDownloading == true {
                         ProgressView()
                     } else if state?.isAIModelDownloaded == true {

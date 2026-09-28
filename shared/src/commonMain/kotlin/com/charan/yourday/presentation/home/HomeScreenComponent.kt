@@ -5,6 +5,7 @@ import com.arkivanov.decompose.router.children.ChildNavState
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.doOnResume
 import com.arkivanov.essenty.lifecycle.subscribe
+import com.charan.yourday.data.repository.A2uiRepository
 import com.charan.yourday.data.repository.CalenderEventsRepo
 import com.charan.yourday.data.repository.DataStoreRepository
 import com.charan.yourday.data.repository.LocalLLMRepository
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
@@ -39,6 +41,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -52,6 +56,115 @@ class HomeScreenComponent(
     componentContext: ComponentContext
 ) : KoinComponent, ComponentContext by componentContext {
 
+    val json = """
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "sample-surface",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json",
+      "sendDataModel": true
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "sample-surface",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "location_input",
+            "pickup_input",
+            "dropoff_input",
+            "book_button"
+          ],
+          "justify": "start",
+          "align": "stretch"
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Book a Car",
+          "variant": "h1"
+        },
+        {
+          "id": "location_input",
+          "component": "TextField",
+          "label": "Pick-up Location",
+          "value": {
+            "path": "/booking/location"
+          },
+          "variant": "shortText"
+        },
+        {
+          "id": "pickup_input",
+          "component": "DateTimeInput",
+          "label": "Pick-up Date",
+          "value": {
+            "path": "/booking/pickupDate"
+          },
+          "enableDate": true,
+          "enableTime": false
+        },
+        {
+          "id": "dropoff_input",
+          "component": "DateTimeInput",
+          "label": "Drop-off Date",
+          "value": {
+            "path": "/booking/dropoffDate"
+          },
+          "enableDate": true,
+          "enableTime": false
+        },
+        {
+          "id": "book_button",
+          "component": "Button",
+          "child": "book_button_text",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "searchCars",
+              "context": {
+                "location": {
+                  "path": "/booking/location"
+                },
+                "pickupDate": {
+                  "path": "/booking/pickupDate"
+                },
+                "dropoffDate": {
+                  "path": "/booking/dropoffDate"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "book_button_text",
+          "component": "Text",
+          "text": "Search Cars",
+          "variant": "body"
+        }
+      ]
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateDataModel": {
+      "surfaceId": "sample-surface",
+      "path": "/booking",
+      "value": {
+        "location": "",
+        "pickupDate": "",
+        "dropoffDate": ""
+      }
+    }
+  }
+]
+""".trimIndent()
+
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
 
@@ -60,6 +173,8 @@ class HomeScreenComponent(
 
     private val _effects = MutableSharedFlow<HomeViewEffect>()
     val effects = _effects.asSharedFlow()
+
+
 
 
     private val weatherRepo: WeatherRepo = get()
@@ -72,6 +187,8 @@ class HomeScreenComponent(
 
     private val permissionsBuilder: PermissionsBuilder = get()
 
+    private val a2uiRepository : A2uiRepository = get()
+
     private val permissions = Permissions(permissionsBuilder)
 
     private val locationPermission = LocationPermission(background = false, precise = true)
@@ -82,8 +199,14 @@ class HomeScreenComponent(
     private val _isLocationPermissionGranted = MutableStateFlow(false)
     private val _isCalendarPermissionGranted = MutableStateFlow(false)
 
+    val surfaces = a2uiRepository.surfaces
+
+
+
+
     init {
         println("HomeScreenComponent initialized")
+
         observeLocationPermission()
         observeCalendarPermission()
         observerWeatherData()
@@ -274,7 +397,7 @@ class HomeScreenComponent(
                     sendEffect(HomeViewEffect.ShowToast(processState.message))
                 }
 
-                ProcessState.Loading -> {
+                is ProcessState.Loading -> {
                     _state.update {
                         it.copy(
                             weatherState = it.weatherState.copy(
@@ -376,7 +499,7 @@ class HomeScreenComponent(
                     sendEffect(HomeViewEffect.ShowToast(processState.message))
                 }
 
-                ProcessState.Loading -> {
+                is ProcessState.Loading -> {
                     _state.update {
                         it.copy(
                             todoState = it.todoState.copy(
@@ -414,7 +537,7 @@ class HomeScreenComponent(
 
                 }
 
-                ProcessState.Loading -> {
+                is ProcessState.Loading -> {
                     _state.update {
                         it.copy(
                             todoState = it.todoState.copy(
@@ -526,8 +649,11 @@ class HomeScreenComponent(
     }
 
     private fun generateSummary() = coroutineScope.launch {
-        println(localLLMRepo.isModelDownloaded())
+
+
+
         if (localLLMRepo.isModelDownloaded()) {
+            println(localLLMRepo.isModelDownloaded())
             combine(
                 state.map { it.weatherState },
                 state.map { it.todoState },
@@ -536,19 +662,20 @@ class HomeScreenComponent(
                 val weatherReady = !weatherState.isLoading
                 val todoReady = !todoState.isLoading
                 val calendarReady = !calendarState.isLoading
-                weatherReady && todoReady && calendarReady
+                weatherReady && calendarReady && todoReady
             }
                 .filter { it }
                 .first()
 
+
             localLLMRepo.generateDaySummary(input = _state.value.generateSummaryPrompt())
-                .collectLatest { processState ->
+                .collect { processState ->
                     when (processState) {
                         is ProcessState.Error -> {
                             sendEffect(HomeViewEffect.ShowToast("Failed to generate summary: ${processState.message}"))
                         }
 
-                        ProcessState.Loading -> {
+                        is ProcessState.Loading -> {
                             _state.update {
                                 it.copy(
                                     aiResponseState = it.aiResponseState.copy(
@@ -562,6 +689,8 @@ class HomeScreenComponent(
 
                         ProcessState.NotDetermined -> {}
                         is ProcessState.Success -> {
+                            a2uiRepository.process(processState.data.aiResponse)
+                            println(processState.data.aiResponse)
                             _state.update {
                                 it.copy(
                                     aiResponseState = it.aiResponseState.copy(
