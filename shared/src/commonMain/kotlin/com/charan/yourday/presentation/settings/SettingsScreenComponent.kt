@@ -1,9 +1,7 @@
 package com.charan.yourday.presentation.settings
 
 import com.arkivanov.decompose.ComponentContext
-import com.charan.yourday.data.repository.LocalLLMRepository
 import com.charan.yourday.data.repository.TodoistRepo
-import com.charan.yourday.utils.ProcessState
 import com.charan.yourday.utils.UserPreferencesStore
 import com.charan.yourday.utils.appVersion
 import kotlinx.coroutines.flow.update
@@ -26,7 +24,6 @@ class SettingsScreenComponent (
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val userPreferences : UserPreferencesStore = get()
     private val todoistRepo: TodoistRepo = get()
-    private val localLLMRepository : LocalLLMRepository = get()
 
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState = _settingsState.asStateFlow()
@@ -34,7 +31,6 @@ class SettingsScreenComponent (
         getSetTemperatureUnits()
         isTodoConnected()
         getAppVersion()
-        isAIModelDownloaded()
     }
 
     private fun getSetTemperatureUnits() = coroutineScope.launch{
@@ -71,63 +67,6 @@ class SettingsScreenComponent (
 
     }
 
-    private fun downloadAIModel() = coroutineScope.launch {
-        localLLMRepository.downloadModel().collectLatest { processState ->
-            when(processState){
-                is ProcessState.Loading -> {
-                    _settingsState.update {
-                        it.copy(
-                            isAiModelDownloading = true
-                        )
-                    }
-                }
-                is ProcessState.Success -> {
-                    _settingsState.update {
-                        it.copy(
-                            isAiModelDownloading = false,
-                            isAIModelDownloaded = true
-                        )
-                    }
-                }
-
-                is ProcessState.Error -> {
-
-                }
-
-                else -> {}
-            }
-        }
-    }
-
-    private fun deleteAIModel() = coroutineScope.launch {
-        localLLMRepository.deleteModel().collectLatest { processState ->
-            when(processState){
-                is ProcessState.Loading -> {
-                    _settingsState.update {
-                        it.copy(
-                            isAiModelDownloading = true
-                        )
-                    }
-                }
-                is ProcessState.Success -> {
-                    _settingsState.update {
-                        it.copy(
-                            isAiModelDownloading = false,
-                            isAIModelDownloaded = false
-                        )
-                    }
-                }
-
-                is ProcessState.Error -> {
-
-                }
-
-                else -> {}
-            }
-        }
-
-    }
-
 
     fun onEvent(event : SettingsEvents) = coroutineScope.launch{
         when(event){
@@ -151,15 +90,6 @@ class SettingsScreenComponent (
                 onLicenseClick()
 
             }
-
-            SettingsEvents.OnDownloadAIModel -> {
-                downloadAIModel()
-            }
-
-            SettingsEvents.OnDeleteAIModel -> {
-                deleteAIModel()
-            }
-            else -> {}
         }
     }
 
@@ -176,16 +106,5 @@ class SettingsScreenComponent (
             )
 
         }
-    }
-
-    private fun isAIModelDownloaded() = coroutineScope.launch {
-        val isDownloaded = localLLMRepository.isModelDownloaded()
-        _settingsState.update {
-            it.copy(
-                isAIModelDownloaded =  isDownloaded
-            )
-        }
-
-
     }
 }

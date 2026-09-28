@@ -77,8 +77,8 @@ class ApiService (val client : HttpClient) {
                     append("Authorization", "Bearer $code")
                     append("Accept", "application/json")
                 }
-                path("api/v1/tasks/filter")
-                parameters.append("query","today|overdue")
+                path("api/v1/tasks")
+                parameters.append("filter","today|overdue")
             }
             println(url)
         }

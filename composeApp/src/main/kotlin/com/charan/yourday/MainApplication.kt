@@ -2,7 +2,6 @@ package com.charan.yourday
 
 import android.app.Activity
 import android.app.Application
-import com.cactus.CactusContextInitializer
 import com.charan.yourday.di.androidModule
 import com.charan.yourday.di.initKoin
 import com.splendo.kaluga.base.ApplicationHolder
@@ -15,7 +14,7 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         ApplicationHolder.applicationContext = this
-        CactusContextInitializer.initialize(this)
+
         initKoin {
             androidContext(this@MainApplication)
             modules(androidModule)

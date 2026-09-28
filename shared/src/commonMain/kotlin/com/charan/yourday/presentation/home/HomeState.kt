@@ -13,7 +13,6 @@ data class HomeState(
     val weatherState: WeatherState = WeatherState(),
     val todoState: TodoState = TodoState(),
     val calenderData: CalenderState = CalenderState(),
-    val aiResponseState : AIResponseState = AIResponseState(),
     val isRefreshing : Boolean = false
 )
 
@@ -66,17 +65,6 @@ data class CalenderState(
     val isCalenderPermissionGranted : Boolean = false,
     val error : String? = null,
     val lastSycned: String? = null
-)
-
-data class AIResponseState(
-    val isModelDownloaded : Boolean = false,
-    val modelName : String? = null,
-    val isGenerating : Boolean = false,
-    val aiResponse : String? = null,
-    val error : String? = null,
-    val thinkingResponse : String? = null,
-    val showThinkingResponse : Boolean = true,
-    val isThinking : Boolean = false
 )
 
 

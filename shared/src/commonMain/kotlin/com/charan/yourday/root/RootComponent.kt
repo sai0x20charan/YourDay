@@ -9,9 +9,6 @@ import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.router.stack.replaceCurrent
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.essenty.lifecycle.Lifecycle
-import com.charan.yourday.data.repository.DataStoreRepository
-import com.charan.yourday.data.repository.LocalLLMRepository
 import com.charan.yourday.presentation.home.HomeScreenComponent
 import com.charan.yourday.presentation.settings.SettingsScreenComponent
 import com.charan.yourday.utils.UserPreferencesStore
@@ -30,15 +27,11 @@ class RootComponent(
     componentContext: ComponentContext
 ) : ComponentContext by componentContext, KoinComponent{
     private val userPreferences: UserPreferencesStore = get()
-    private val dataStoreRepository : DataStoreRepository = get()
-    private val localLLMRepository : LocalLLMRepository = get()
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     init {
         coroutineScope.launch {
             val shouldShowOnBoarding = userPreferences.shouldShowOnboarding.first()
             if(shouldShowOnBoarding) navigation.replaceCurrent(Configuration.OnBoardingScreen(authorizationId,errorCode))
-            dataStoreRepository.setModelDownloaded(localLLMRepository.isModelDownloaded())
-
         }
     }
 
@@ -68,8 +61,7 @@ class RootComponent(
                     errorCode = config.errorCode,
                     onSettingsOpen = {
                         navigation.pushNew(Configuration.SettingsScreen)
-                    },
-                    isResumed = lifecycle.state == Lifecycle.State.RESUMED
+                    }
                 )
             )
             Configuration.SettingsScreen -> Child.SettingsScreen(
@@ -99,8 +91,7 @@ class RootComponent(
                     errorCode = config.error,
                     onBoardFinish = {
                         finishOnBoard()
-                    },
-                    isResumed = false
+                    }
 
                 )
             )

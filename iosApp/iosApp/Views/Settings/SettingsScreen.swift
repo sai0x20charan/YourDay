@@ -8,73 +8,84 @@
 
 import SwiftUI
 import Shared
-
 struct SettingsScreen: View {
-    var component: SettingsScreenComponent
-    @State private var state: Shared.SettingsState?
-
+    var component : SettingsScreenComponent
+    @State var state : Shared.SettingsState?
+    @State var weatherUnit : String?
     var body: some View {
         List {
-            // MARK: - Weather
-            Section("Weather") {
-                Picker("Temperature Units", selection: Binding(
-                    get: { state?.weatherUnits ?? "" },
-                    set: { component.onEvent(event: Shared.SettingsEvents.OnChangeWeatherUnits(weatherUnit: $0)) }
-                )) {
-                    ForEach(Shared.WeatherUnitsEnums.allCases, id: \.self) { item in
-                        let label = item == .c ? WeatherUnits.shared.C : WeatherUnits.shared.F
-                        Text(label).tag(label)
-                    }
-                }
-            }
+                Section(
+                    header: Text("Weather")
+                        
+                ){
+                    Picker("Temperature Units", selection: Binding(
+                        get: { state?.weatherUnits ?? "" },
+                        set: { newValue in
+                            component.onEvent(event: Shared.SettingsEvents.OnChangeWeatherUnits(weatherUnit: newValue))
+                        }
+                    )) {
+                        ForEach(Shared.WeatherUnitsEnums.allCases, id: \.self) { item in
+                            
+                            let unitsString = switch item {
+                            case .c: WeatherUnits.shared.C
+                            case .f: WeatherUnits.shared.F
+                            }
 
-            // MARK: - Tasks
-            Section("Tasks") {
-                LabeledContent("Todoist Integration") {
-                    Button(state?.isTodoistConnected == true ? "Disconnect" : "Connect") {
+                            Text(unitsString).tag(unitsString)
+                        }
+                    }
+                    
+                    .pickerStyle(MenuPickerStyle())
+                    .listRowInsets(.init(top: 0, leading: 20, bottom: 0, trailing: 20))
+                    .onChange(of: state?.weatherUnits ?? "") { newValue in
+                        component.onEvent(event: Shared.SettingsEvents.OnChangeWeatherUnits(weatherUnit:newValue))
+                    }
+                    
+                    
+                }
+            Section(
+                header: Text("Tasks")
+            ) {
+                HStack {
+                    Text("Todoist Integration")
+                    Spacer()
+                    Button(state?.isTodoistConnected == false ? "Connect" : "Disconnect") {
                         component.onEvent(event: Shared.SettingsEvents.TodoConnect.shared)
                     }
-                    .tint(state?.isTodoistConnected == true ? .red : .accentColor)
                 }
+                
             }
-
-            // MARK: - AI
-            Section("AI") {
-                LabeledContent("qwen3-0.6") {
-                    if state?.isAiModelDownloading == true {
-                        ProgressView()
-                    } else if state?.isAIModelDownloaded == true {
-                        Button(role: .destructive) {
-                            component.onEvent(event: SettingsEvents.OnDeleteAIModel())
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                                .labelStyle(.iconOnly)
-                        }
-                    } else {
-                        Button {
-                            component.onEvent(event: SettingsEvents.OnDownloadAIModel())
-                        } label: {
-                            Label("Download", systemImage: "arrow.down.circle")
-                                .labelStyle(.iconOnly)
-                        }
+            Section(
+                header: Text("About App")){
+                    HStack{
+                        Text("App version")
+                        Spacer()
+                        Text(state?.appVersion ?? "")
                     }
+                    
                 }
-            }
+                    
+                    
+                
+                
+                
 
-            // MARK: - About
-            Section("About") {
-                LabeledContent("App Version", value: state?.appVersion ?? "—")
             }
+        .onAppear{
+            observeState()
         }
-        .navigationTitle("Settings")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbarRole(.editor)
-        .task { await observeState() }
-    }
+            .toolbarRole(.editor)
+            .navigationTitle("Settings")
 
-    private func observeState() async {
-        for await settingsState in component.settingsState {
-            state = settingsState
+        
+    }
+    private func observeState() {
+        Task {
+            for await settingsState in component.settingsState {
+                state = settingsState
+                weatherUnit = state?.weatherUnits
+            }
         }
     }
 }
+

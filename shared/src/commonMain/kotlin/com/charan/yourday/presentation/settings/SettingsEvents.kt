@@ -5,7 +5,4 @@ sealed class SettingsEvents {
         data object TodoConnect : SettingsEvents()
         data object onBack : SettingsEvents()
         data object OnLicenseNavigate : SettingsEvents()
-        data object OnDownloadAIModel : SettingsEvents()
-
-        data object OnDeleteAIModel : SettingsEvents()
 }

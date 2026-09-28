@@ -12,6 +12,4 @@ sealed interface HomeEvent {
     data class OnOpenLink(val url : String) : HomeEvent
     object RefreshData : HomeEvent
     object OnBoardingFinish : HomeEvent
-    object OnToggleThinkingResponse : HomeEvent
-    object OnGenerateAIResponse : HomeEvent
 }
