@@ -3,6 +3,8 @@ package com.charan.yourday.presentation.home
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arkivanov.decompose.ComponentContext
+import com.charan.yourday.data.model.WeatherData
+import com.charan.yourday.data.network.responseDTO.ForecastClass
 import com.charan.yourday.data.network.responseDTO.TodoistTokenDTO
 import com.charan.yourday.data.repository.CalenderEventsRepo
 import com.charan.yourday.data.repository.DataStoreRepository
@@ -14,6 +16,8 @@ import com.charan.yourday.presentation.toCurrentWeatherState
 import com.charan.yourday.presentation.toForecastWeatherState
 import com.charan.yourday.presentation.toTodoDataState
 import com.charan.yourday.utils.DateUtils
+import com.charan.yourday.utils.DateUtils.getGreeting
+import com.charan.yourday.utils.DateUtils.toDDMMYYYY
 import com.charan.yourday.utils.ErrorCodes
 import com.charan.yourday.utils.OpenURL
 import com.charan.yourday.utils.ProcessState
@@ -38,13 +42,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.toLocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
-
+@OptIn(ExperimentalTime::class)
 class HomeScreenComponent(
     val authorizationId: String?,
     private val errorCode: String?,
@@ -59,7 +66,7 @@ class HomeScreenComponent(
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
-    private val _effects = MutableSharedFlow<HomeViewEffect>()
+    private val _effects = MutableSharedFlow<HomeEffect>()
     val effects = _effects.asSharedFlow()
 
 
@@ -83,7 +90,6 @@ class HomeScreenComponent(
     private val _isCalendarPermissionGranted = MutableStateFlow(false)
 
     init {
-        println("HomeScreenComponent initialized")
         observeLocationPermission()
         observeCalendarPermission()
         observerWeatherData()
@@ -92,40 +98,67 @@ class HomeScreenComponent(
             authorizationId?.let {
                 getTodoistAccessToken(it)
             }
-            errorCode?.let { sendEffect(HomeViewEffect.ShowToast("Unable to authenticate")) }
+            errorCode?.let { sendEffect(HomeEffect.ShowToast("Unable to authenticate")) }
         }
         refreshData()
     }
 
-    fun onEvent(intent: HomeEvent) {
-        when (intent) {
+    fun onEvent(event: HomeEvent) {
+        when (event) {
             is HomeEvent.RequestLocationPermission -> handleLocationPermission()
             is HomeEvent.RequestCalendarPermission -> handleCalendarPermission()
             HomeEvent.ConnectTodoist -> requestTodoistAuthentication()
             HomeEvent.FetchWeather -> fetchLocationAndWeather()
             HomeEvent.FetchCalendarEvents -> fetchCalendarEvents()
             HomeEvent.DisconnectTodoist -> clearTodoistToken()
-            HomeEvent.OpenSettingsPage -> onSettingsOpen()
-            is HomeEvent.OnOpenLink -> openURL(intent.url)
+            HomeEvent.OpenSettingsPage -> {
+                updateDropdownMenuState(false)
+                onSettingsOpen()
+            }
+            is HomeEvent.OnOpenLink -> openURL(event.url)
             HomeEvent.FetchTodo -> checkTokenAndFetchTasks()
             HomeEvent.RefreshData -> refreshData()
             HomeEvent.OnBoardingFinish -> {
                 onBoardFinish()
             }
+            is HomeEvent.ShowDropdownMenu -> {
+                updateDropdownMenuState(event.show)
+            }
+        }
+    }
+
+    private fun updateDropdownMenuState(show: Boolean) {
+        _state.update {
+            it.copy(
+                showDropDown = show
+            )
         }
     }
 
     private fun refreshData() {
+        refreshDateAndGreetings()
         fetchLocationAndWeather()
         fetchCalendarEvents()
         checkTokenAndFetchTasks()
+        updateDropdownMenuState(false)
+    }
+
+
+    private fun refreshDateAndGreetings(){
+        val localDateTime = DateUtils.getCurrentDateTime()
+        _state.update {
+            it.copy(
+                greetings = localDateTime.getGreeting(),
+                currentDateTime = localDateTime.toDDMMYYYY()
+            )
+        }
+
     }
 
     private fun observeLocationPermission() = coroutineScope.launch {
-        permissions[locationPermission].collectLatest { permissionState ->
+        permissions[locationPermission].filter { it !is PermissionState.Uninitialized }.collectLatest { permissionState ->
             val isGranted = permissionState is PermissionState.Allowed
             _isLocationPermissionGranted.value = isGranted
-
             _state.update {
                 it.copy(
                     weatherState = it.weatherState.copy(
@@ -133,8 +166,6 @@ class HomeScreenComponent(
                     )
                 )
             }
-
-
             if (isGranted) {
                 fetchLocationAndWeather()
             }
@@ -142,7 +173,7 @@ class HomeScreenComponent(
     }
 
     private fun observeCalendarPermission() = coroutineScope.launch {
-        permissions[calendarPermission].collectLatest { permissionState ->
+        permissions[calendarPermission].filter { it !is PermissionState.Uninitialized }.collectLatest { permissionState ->
             val isGranted = permissionState is PermissionState.Allowed
             _isCalendarPermissionGranted.value = isGranted
 
@@ -212,7 +243,7 @@ class HomeScreenComponent(
             if (location != null) {
                 fetchWeatherData(location.latitude!!, location.longitude!!)
             } else {
-                sendEffect(HomeViewEffect.ShowToast("Unable to fetch location"))
+                sendEffect(HomeEffect.ShowToast("Unable to fetch location"))
                 _state.update {
                     it.copy(
                         weatherState = it.weatherState.copy(
@@ -242,7 +273,7 @@ class HomeScreenComponent(
                             )
                         )
                     }
-                    sendEffect(HomeViewEffect.ShowToast(processState.message))
+                    sendEffect(HomeEffect.ShowToast(processState.message))
                 }
 
                 ProcessState.Loading -> {
@@ -285,12 +316,21 @@ class HomeScreenComponent(
                     weatherState = it.weatherState.copy(
                         currentWeather = currentWeatherState,
                         forecastWeather = forecastWeatherState ?: emptyList(),
-                        weatherUnits = weatherUnit.name
+                        weatherUnits = weatherUnit.name,
+                        scrollToForecastCurrentTimeIndex = calculateCurrentForecastIndex(weatherData.forecast ?: emptyList())
                     )
                 )
             }
         }
     }
+    private fun calculateCurrentForecastIndex(
+        forecast: List<WeatherData>,
+    ): Int {
+        return forecast.indexOfFirst { item ->
+            item.time?.hour == DateUtils.getCurrentDateTime().hour
+        }.coerceAtLeast(0)
+    }
+
 
     private fun observeTodoData() = coroutineScope.launch {
         dataStoreRepo.todoData.collectLatest { todoData ->
@@ -322,7 +362,6 @@ class HomeScreenComponent(
         _state.update {
             it.copy(
                 todoState = it.todoState.copy(
-                    isAuthenticating = true,
                     error = null
                 )
             )
@@ -342,7 +381,7 @@ class HomeScreenComponent(
                             )
                         )
                     }
-                    sendEffect(HomeViewEffect.ShowToast(processState.message))
+                    sendEffect(HomeEffect.ShowToast(processState.message))
                 }
 
                 ProcessState.Loading -> {
@@ -412,7 +451,7 @@ class HomeScreenComponent(
     private fun handleTodoistTasksError(message: String) {
         if (message == ErrorCodes.UNAUTHORIZED.name) {
             clearTodoistToken()
-            sendEffect(HomeViewEffect.ShowToast("Session expired. Please connect again."))
+            sendEffect(HomeEffect.ShowToast("Session expired. Please connect again."))
             _state.update {
                 it.copy(
                     todoState = it.todoState.copy(
@@ -431,7 +470,7 @@ class HomeScreenComponent(
                     )
                 )
             }
-            sendEffect(HomeViewEffect.ShowToast(message))
+            sendEffect(HomeEffect.ShowToast(message))
         }
 
     }
@@ -444,7 +483,8 @@ class HomeScreenComponent(
                         todoState = it.todoState.copy(
                             isTodoAuthenticated = false,
                             todoToken = null,
-                            todoData = null
+                            todoData = null,
+                            isLoading = false
                         )
                     )
                 }
@@ -476,7 +516,7 @@ class HomeScreenComponent(
         }
     }
 
-    private fun sendEffect(effect: HomeViewEffect) = coroutineScope.launch {
+    private fun sendEffect(effect: HomeEffect) = coroutineScope.launch {
         _effects.emit(effect)
     }
 

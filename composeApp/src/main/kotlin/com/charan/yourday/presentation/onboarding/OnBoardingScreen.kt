@@ -1,6 +1,5 @@
 package com.charan.yourday.presentation.onboarding
 
-import android.Manifest
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
@@ -24,13 +23,8 @@ import androidx.compose.ui.unit.dp
 import com.charan.yourday.MR
 import com.charan.yourday.presentation.home.HomeEvent
 import com.charan.yourday.presentation.home.HomeScreenComponent
-import com.charan.yourday.presentation.home.HomeViewEffect
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import dev.icerock.moko.resources.compose.painterResource
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -123,9 +117,7 @@ fun OnBoardingScreen(
                     buttonText = "Enable Location",
                     onAction = {
                         component.onEvent(
-                            HomeEvent.RequestLocationPermission(
-                               false
-                            )
+                            HomeEvent.RequestLocationPermission
                         )
                     }
                 )
@@ -143,9 +135,7 @@ fun OnBoardingScreen(
                     buttonText = "Grant Calendar Access",
                     onAction = {
                         component.onEvent(
-                            HomeEvent.RequestCalendarPermission(
-                                false
-                            )
+                            HomeEvent.RequestCalendarPermission
                         )
                     }
                 )

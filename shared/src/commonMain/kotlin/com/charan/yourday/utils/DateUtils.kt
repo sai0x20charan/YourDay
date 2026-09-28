@@ -19,6 +19,18 @@ import kotlin.time.Instant
 
 @OptIn(FormatStringsInDatetimeFormats::class, ExperimentalTime::class)
 object DateUtils {
+
+    fun getCurrentDateTime(): LocalDateTime {
+        return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    }
+
+    fun LocalDateTime.toDDMMYYYY(): String {
+        val formatPattern = "dd/MM/yyyy"
+        val dateTimeFormat = LocalDateTime.Format {
+            byUnicodePattern(formatPattern)
+        }
+        return this.format(dateTimeFormat)
+    }
     fun getDateInDDMMYYYY(): String {
         val formatPattern = "dd/MM/yyyy"
         val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -28,8 +40,8 @@ object DateUtils {
         return currentDate.format(dateTimeFormat)
     }
 
-    fun getGreeting(): String {
-        val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time
+    fun LocalDateTime.getGreeting(): String {
+        val currentTime = this.time
         return when (currentTime.hour) {
             in 5..11 -> "Good Morning"
             in 12..17 -> "Good Afternoon"
