@@ -13,6 +13,7 @@ plugins {
     alias(libs.plugins.mikepenz.aboutlibrary) apply false
     alias(libs.plugins.mikepenz.aboutlibrary.android) apply false
     alias(libs.plugins.multiplatformResources) apply false
+    alias(libs.plugins.koin.compiler) apply false
 }
 
 buildscript {

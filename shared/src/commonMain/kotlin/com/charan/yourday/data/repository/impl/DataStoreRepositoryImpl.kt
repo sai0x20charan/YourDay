@@ -12,7 +12,9 @@ import com.charan.yourday.utils.WeatherUnitsEnums
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import org.koin.core.annotation.Single
 
+@Single(binds = [DataStoreRepository::class])
 class DataStoreRepositoryImpl(
     private val dataStore : DataStore<Preferences>
 ) : DataStoreRepository {

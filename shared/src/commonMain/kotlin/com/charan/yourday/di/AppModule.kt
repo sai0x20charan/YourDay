@@ -1,41 +1,37 @@
 package com.charan.yourday.di
 
-import com.charan.yourday.data.network.Ktor.ApiService
 import com.charan.yourday.data.network.Ktor.createHttpClient
-import com.charan.yourday.data.repository.DataStoreRepository
-import com.charan.yourday.data.repository.TodoistRepo
-import com.charan.yourday.data.repository.WeatherRepo
-import com.charan.yourday.data.repository.impl.DataStoreRepositoryImpl
-import com.charan.yourday.data.repository.impl.TodoistImp
-import com.charan.yourday.data.repository.impl.WeatherRepoImp
-import com.charan.yourday.utils.UserPreferencesStore
 import com.splendo.kaluga.permissions.base.PermissionsBuilder
 import com.splendo.kaluga.permissions.calendar.registerCalendarPermissionIfNotRegistered
-import com.splendo.kaluga.permissions.location.registerLocationPermission
 import com.splendo.kaluga.permissions.location.registerLocationPermissionIfNotRegistered
-import org.koin.core.context.startKoin
-import org.koin.core.module.dsl.viewModel
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngine
+import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.KoinApplication
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.koin.dsl.KoinAppDeclaration
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.startKoin
 
-    val appModule = module {
-        single { createHttpClient(get()) }
-        factory  { ApiService(client = get()) }
-        factory  <WeatherRepo> { WeatherRepoImp(apiService = get(),get()) }
-        factory <TodoistRepo>{ TodoistImp(get(),get())  }
-        single <UserPreferencesStore>{ UserPreferencesStore() }
-        single <DataStoreRepository>{ DataStoreRepositoryImpl(get()) }
-        single <PermissionsBuilder>{
-            PermissionsBuilder()
-                .apply {
-                    this.registerLocationPermissionIfNotRegistered()
-                    this.registerCalendarPermissionIfNotRegistered()
-                }
+@Module(includes = [PlatformModule::class])
+@ComponentScan("com.charan.yourday")
+class AppModule {
+    @Single
+    fun provideHttpClient(engine: HttpClientEngine): HttpClient =
+        createHttpClient(engine)
+
+    @Single
+    fun providePermissionsBuilder(): PermissionsBuilder =
+        PermissionsBuilder().apply {
+            registerLocationPermissionIfNotRegistered()
+            registerCalendarPermissionIfNotRegistered()
         }
+}
 
-    }
+@Module
+expect class PlatformModule()
 
-    fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
-        appDeclaration()
-        modules(appModule)
-    }
+@KoinApplication(modules = [AppModule::class])
+class YourDayApp
+
+fun initKoin(appDeclaration: KoinAppDeclaration? = null) = startKoin<YourDayApp>(appDeclaration)

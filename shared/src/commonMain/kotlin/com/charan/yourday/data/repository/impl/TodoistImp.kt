@@ -17,8 +17,9 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import org.koin.core.annotation.Factory
 
-
+@Factory(binds = [TodoistRepo::class])
 class TodoistImp(
     private val apiService: ApiService,
     private val dataStoreRepository: DataStoreRepository
