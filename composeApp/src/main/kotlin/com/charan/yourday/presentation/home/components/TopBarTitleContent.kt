@@ -12,13 +12,3 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.charan.yourday.utils.DateUtils
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun TopBarTitleContent(modifier: Modifier) {
-
-    Column(modifier = modifier) {
-        Text(DateUtils.getGreeting(),style = MaterialTheme.typography.headlineMediumEmphasized.copy(fontWeight = FontWeight.Bold))
-        Spacer(Modifier.height(5.dp))
-        Text(DateUtils.getDateInDDMMYYYY(), style = MaterialTheme.typography.bodyLargeEmphasized)
-    }
-}
