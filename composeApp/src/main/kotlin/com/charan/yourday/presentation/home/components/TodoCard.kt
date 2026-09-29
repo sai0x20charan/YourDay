@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.charan.yourday.MR
+import com.charan.yourday.*
 import com.charan.yourday.presentation.home.TodoState
 import com.charan.yourday.utils.DateUtils.toMMMDYYYYWithTime
 import dev.icerock.moko.resources.compose.painterResource
@@ -103,7 +104,3 @@ fun TodoCard(
         }
     )
 }
-
-
-
-

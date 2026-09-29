@@ -1,7 +1,5 @@
 package com.charan.yourday.presentation.home
 
-import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arkivanov.decompose.ComponentContext
 import com.charan.yourday.data.model.WeatherData
 import com.charan.yourday.data.network.responseDTO.ForecastClass

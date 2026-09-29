@@ -1,6 +1,7 @@
 package com.charan.yourday.utils
 
 import com.charan.yourday.MR
+import com.charan.yourday.*
 import dev.icerock.moko.resources.ImageResource
 
 actual object WeatherIconName {

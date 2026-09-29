@@ -20,3 +20,4 @@ captures
 /composeApp/src/release/
 /composeApp/src/debug/
 iosApp/iosApp/GoogleService-Info.plist
+.hotswan/
