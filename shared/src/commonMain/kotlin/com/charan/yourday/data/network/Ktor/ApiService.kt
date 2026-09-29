@@ -18,10 +18,13 @@ import io.ktor.client.utils.EmptyContent.headers
 import io.ktor.http.Parameters
 import io.ktor.http.append
 import io.ktor.http.path
+import org.koin.core.annotation.Factory
 
 const val weather_base_url = "api.weatherapi.com"
 const val todoist_base_url = "todoist.com"
 const val todoist_api_url = "api.todoist.com"
+
+@Factory
 class ApiService (val client : HttpClient) {
     suspend fun getCurrentWeather(lat : Double, long : Double) : HttpResponse {
 

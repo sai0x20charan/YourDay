@@ -1,23 +1,15 @@
 package com.charan.yourday
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.app.ActivityCompat.PermissionCompatDelegate
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.defaultComponentContext
 import com.arkivanov.decompose.handleDeepLink
-import com.arkivanov.decompose.retainedComponent
-import com.charan.yourday.di.androidModule
-import com.charan.yourday.di.initKoin
 import com.charan.yourday.root.RootComponent
 
 class MainActivity : ComponentActivity() {
@@ -57,4 +49,3 @@ class MainActivity : ComponentActivity() {
 
 
 }
-

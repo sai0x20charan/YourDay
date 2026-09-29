@@ -17,7 +17,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import org.koin.core.annotation.Factory
 
+@Factory(binds = [WeatherRepo::class])
 class WeatherRepoImp(
     private val apiService: ApiService,
     private val dataStoreRepo : DataStoreRepository

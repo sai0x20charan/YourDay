@@ -33,8 +33,6 @@ import com.charan.yourday.ui.theme.slideAndFade
 import dev.icerock.moko.permissions.PermissionsController
 import dev.icerock.moko.permissions.compose.BindEffect
 import org.jetbrains.compose.resources.painterResource
-import org.koin.compose.KoinContext
-import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 
 
@@ -44,36 +42,32 @@ import org.koin.compose.koinInject
 )
 @Composable
 fun App(root: RootComponent) {
-    KoinContext  {
-        val permissionsController: PermissionsController = koinInject()
-        BindEffect(permissionsController = permissionsController)
+    val permissionsController: PermissionsController = koinInject()
+    BindEffect(permissionsController = permissionsController)
 
-        AppTheme {
-            Surface {
-                Children(
-                    stack = root.childStack,
-                    animation = predictiveBackAnimation(
-                        backHandler = root.backHandler,
-                        fallbackAnimation = stackAnimation { current, target, direction ->
-                            slideAndFade()
-                        },
-                        selector = { backEvent, _, _ -> androidPredictiveBackAnimatable(backEvent) },
-                        onBack = root::onBackClicked,
-                    ),
-                ) { child ->
+    AppTheme {
+        Surface {
+            Children(
+                stack = root.childStack,
+                animation = predictiveBackAnimation(
+                    backHandler = root.backHandler,
+                    fallbackAnimation = stackAnimation { current, target, direction ->
+                        slideAndFade()
+                    },
+                    selector = { backEvent, _, _ -> androidPredictiveBackAnimatable(backEvent) },
+                    onBack = root::onBackClicked,
+                ),
+            ) { child ->
 
-                    when (val instance = child.instance) {
+                when (val instance = child.instance) {
 
-                        is RootComponent.Child.HomeScreen -> HomeScreen(instance.component)
-                        is RootComponent.Child.SettingsScreen -> SettingsScreen(instance.component)
-                        is RootComponent.Child.LicenseScreen -> LicenseScreen(instance.component)
-                        is RootComponent.Child.OnBoardingScreen -> OnBoardingScreen(instance.component)
-                    }
-
+                    is RootComponent.Child.HomeScreen -> HomeScreen(instance.component)
+                    is RootComponent.Child.SettingsScreen -> SettingsScreen(instance.component)
+                    is RootComponent.Child.LicenseScreen -> LicenseScreen(instance.component)
+                    is RootComponent.Child.OnBoardingScreen -> OnBoardingScreen(instance.component)
                 }
+
             }
         }
-
     }
-
 }

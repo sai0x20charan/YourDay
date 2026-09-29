@@ -8,7 +8,14 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.buildKonfig)
     alias(libs.plugins.skie)
+    alias(libs.plugins.koin.compiler)
 //    alias(libs.plugins.mikepenz.aboutlibrary)
+}
+
+koinCompiler {
+    compileSafety = true
+    strictSafety = false
+    userLogs = true
 }
 
 kotlin {
@@ -35,7 +42,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.content.negotiation)
@@ -43,6 +49,7 @@ kotlin {
             api(libs.resources)
             api(libs.kotlinx.datetime)
             api(libs.koin.core)
+            api(libs.koin.annotations)
             api(libs.graphics)
             implementation(libs.koin.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
@@ -85,19 +92,19 @@ buildkonfig {
     packageName = "com.charan.yourday"
 
     defaultConfigs {
-        val apiKey: String = gradleLocalProperties(rootDir, providers).getProperty("API_KEY")
+        val apiKey: String = gradleLocalProperties(rootDir, providers).getProperty("API_KEY") ?: ""
         buildConfigField(FieldSpec.Type.STRING, "API_KEY", apiKey)
-        val todoistClientID: String = gradleLocalProperties(rootDir, providers).getProperty("TODOIST_CLIENT_ID")
+        val todoistClientID: String = gradleLocalProperties(rootDir, providers).getProperty("TODOIST_CLIENT_ID") ?: ""
         buildConfigField(FieldSpec.Type.STRING, "TODOIST_CLIENT_ID", todoistClientID)
-        val todoistClientSecret: String = gradleLocalProperties(rootDir, providers).getProperty("TODOIST_CLIENT_SECRET")
+        val todoistClientSecret: String = gradleLocalProperties(rootDir, providers).getProperty("TODOIST_CLIENT_SECRET") ?: ""
         buildConfigField(FieldSpec.Type.STRING, "TODOIST_CLIENT_SECRET", todoistClientSecret)
-        val keyStorePassword: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_STORE_PASSWORD")
+        val keyStorePassword: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_STORE_PASSWORD") ?: ""
         buildConfigField(FieldSpec.Type.STRING, "KEY_STORE_PASSWORD", keyStorePassword)
-        val keyPassword: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_PASSWORD")
+        val keyPassword: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_PASSWORD") ?: ""
         buildConfigField(FieldSpec.Type.STRING, "KEY_PASSWORD", keyPassword)
-        val keyAlias: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_ALIAS")
+        val keyAlias: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_ALIAS") ?: ""
         buildConfigField(FieldSpec.Type.STRING, "KEY_ALIAS", keyAlias)
-        val keyLocation: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_LOCATION")
+        val keyLocation: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_LOCATION") ?: ""
         buildConfigField(FieldSpec.Type.STRING, "KEY_LOCATION", keyLocation)
 
 
@@ -105,5 +112,3 @@ buildkonfig {
 
     }
 }
-
-

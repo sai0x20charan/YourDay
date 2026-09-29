@@ -7,11 +7,12 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
-import org.koin.core.component.inject
+import org.koin.core.annotation.Single
 
-class UserPreferencesStore : KoinComponent {
+@Single
+class UserPreferencesStore(
+    private val dataStore: DataStore<Preferences>
+) {
     companion object {
         private const val TODOIST_ACCESS_TOKEN = "todoist_access_token"
         private const val TODO_PROVIDER = "todo_provider"
@@ -21,8 +22,6 @@ class UserPreferencesStore : KoinComponent {
         private val todoTokenPref = stringPreferencesKey(TODOIST_ACCESS_TOKEN)
         private val should_show_onboarding = booleanPreferencesKey(SHOULD_SHOW_ONBOARDING)
     }
-
-    private val dataStore: DataStore<Preferences> = get()
 
     val weatherUnits: Flow<String?> = dataStore.data.map { preferences ->
         preferences[weatherUnitsPref] ?: WeatherUnits.C
