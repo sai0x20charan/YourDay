@@ -13,9 +13,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.charan.yourday.R
-import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 
@@ -39,15 +37,11 @@ fun LicenseScreen(
                     }
                 }
             )
-
         }
     ) {
         LibrariesContainer(
-            libraries = libraries,
-            modifier = Modifier.padding(it)
+            modifier = Modifier.padding(it),
+            libraries = libraries
         )
-
-
     }
-
 }

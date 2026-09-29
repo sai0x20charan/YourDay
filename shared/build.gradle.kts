@@ -20,9 +20,13 @@ koinCompiler {
 
 kotlin {
 
-    androidLibrary {
+    android {
         namespace = "com.charan.yourday.shared"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        compileSdk {
+            version = release(libs.versions.android.compileSdk.get().toInt()){
+                minorApiLevel = 0
+            }
+        }
     }
     
     listOf(
@@ -41,46 +45,44 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
+            // Ktor BOM & clients
+            implementation(project.dependencies.platform(libs.ktor.bom))
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.encoding)
-            api(libs.resources)
-            api(libs.kotlinx.datetime)
+
+            // Kotlinx Coroutines BOM
+            implementation(project.dependencies.platform(libs.kotlinx.coroutines.bom))
+            implementation(libs.kotlinx.coroutines.core)
+
+            // Koin BOM & annotations
+            api(project.dependencies.platform(libs.koin.bom))
             api(libs.koin.core)
             api(libs.koin.annotations)
+
+            api(libs.resources)
+            api(libs.kotlinx.datetime)
             api(libs.graphics)
-            implementation(libs.koin.compose)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.napier)
-            api(libs.permissions)
-            api(libs.permissions.compose)
-            implementation(libs.koin.compose.viewmodel)
             api(libs.datastore.preferences)
             api(libs.datastore)
             api(libs.decompose)
-            implementation(libs.kotlinx.coroutines.core)
             api(libs.essenty.lifecycle)
             api(libs.essenty.stateKeeper)
             api(libs.essenty.instanceKeeper)
-            api("com.splendo.kaluga:base-permissions:1.6.0")
-            api("com.splendo.kaluga:calendar-permissions:1.6.0")
-            api("com.splendo.kaluga:location-permissions:1.6.0")
 
-
-
-            // put your Multiplatform dependencies here
+            api(libs.kaluga.permissions.base)
+            api(libs.kaluga.permissions.calendar)
+            api(libs.kaluga.permissions.location)
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.koin.android)
-            implementation (libs.play.services.location)
-            implementation (libs.accompanist.permissions)
+            implementation(libs.play.services.location)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-
         }
     }
 }
@@ -106,9 +108,5 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.STRING, "KEY_ALIAS", keyAlias)
         val keyLocation: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_LOCATION") ?: ""
         buildConfigField(FieldSpec.Type.STRING, "KEY_LOCATION", keyLocation)
-
-
-
-
     }
 }

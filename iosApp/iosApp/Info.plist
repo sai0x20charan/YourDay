@@ -42,7 +42,7 @@
 		<true/>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Your app uses calender permission to show the events</string>
+	<string>Your app uses calendar permission to show the events</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your app uses location services only when the app is running</string>
 	<key>UIApplicationSceneManifest</key>

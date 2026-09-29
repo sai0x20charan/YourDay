@@ -1,6 +1,11 @@
 package com.charan.yourday.permission
 
 enum class PermissionType {
-    CALENDER,
-    LOCATION
+    CALENDAR,
+    LOCATION;
+
+    companion object {
+        @Deprecated("Use CALENDAR instead", ReplaceWith("CALENDAR"))
+        val CALENDER = CALENDAR
+    }
 }

@@ -1,6 +1,6 @@
 package com.charan.yourday.di
 
-import com.charan.yourday.data.network.Ktor.createHttpClient
+import com.charan.yourday.data.network.ktor.createHttpClient
 import com.splendo.kaluga.permissions.base.PermissionsBuilder
 import com.splendo.kaluga.permissions.calendar.registerCalendarPermissionIfNotRegistered
 import com.splendo.kaluga.permissions.location.registerLocationPermissionIfNotRegistered

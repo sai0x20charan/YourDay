@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Layer Refactor Plan for YourDay</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #000000;
+      color: #e6e6e6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1, h2, h3 {
+      color: #7aa2f7;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 24px;
+    }
+    h2 {
+      font-size: 1.4rem;
+      margin-top: 48px;
+      border-bottom: 1px solid #222;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 1.1rem;
+      margin-top: 24px;
+      color: #bb9af7;
+    }
+    p {
+      margin-bottom: 16px;
+    }
+    ul, ol {
+      margin-bottom: 20px;
+      padding-left: 24px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9em;
+      background-color: #111111;
+      padding: 2px 6px;
+      color: #9ece6a;
+    }
+    pre {
+      background-color: #111111;
+      border: 1px solid #222222;
+      padding: 16px;
+      overflow-x: auto;
+      margin-bottom: 24px;
+    }
+    pre code {
+      background-color: transparent;
+      padding: 0;
+      color: #e6e6e6;
+      font-size: 0.88rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #222;
+    }
+    th {
+      color: #7aa2f7;
+      font-weight: 600;
+    }
+    .secondary {
+      color: #999999;
+    }
+    .mermaid {
+      margin: 24px 0;
+      background: #0a0a0a;
+      padding: 16px;
+      border: 1px solid #222;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Data layer refactor plan for YourDay</h1>
+    <p class="secondary">A guide in simple English on why the current setup hurts the app and how to fix it step by step.</p>
+
+    <h2>What is wrong right now</h2>
+    <p>The app works on screen, but the code underneath has several bad habits that make bugs easy to write and hard to fix.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Problem</th>
+          <th>What happens today</th>
+          <th>Why it is bad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Repositories return booleans</td>
+          <td><code>WeatherRepo.getCurrentForecast()</code> returns <code>Flow&lt;ProcessState&lt;Boolean&gt;&gt;</code>.</td>
+          <td>The repository fetches data, writes it to a file, and returns <code>true</code>. The screen must make two separate calls: one to ask for a fetch, and one to read the file.</td>
+        </tr>
+        <tr>
+          <td>DataStore used as a database</td>
+          <td>The app converts whole weather objects and task lists into JSON text and dumps them into Android settings.</td>
+          <td>Android preferences are built for tiny values like flags or strings. Rewriting entire weather reports to disk freezes and slows down reads.</td>
+        </tr>
+        <tr>
+          <td>Two conflicting preference stores</td>
+          <td><code>UserPreferencesStore</code> and <code>DataStoreRepositoryImpl</code> both touch the same keys.</td>
+          <td>Logging out in one place writes an empty string, while the other screen expects null. The UI shows you are still logged in after you disconnect.</td>
+        </tr>
+        <tr>
+          <td>Screen does everything</td>
+          <td><code>HomeScreenComponent</code> handles network calls, tokens, GPS, and calendar checks in one giant file.</td>
+          <td>If you want to show weather on another screen or run background sync, you have to copy and paste hundreds of lines.</td>
+        </tr>
+        <tr>
+          <td>Calendar queries block the UI</td>
+          <td><code>CalenderEventsImp</code> calls the Android calendar content resolver on the main thread.</td>
+          <td>Phones with hundreds of calendar events will stutter or freeze when opening the home screen.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>How the data flow should look</h2>
+    <p>Good architecture has one clear direction for data: UI calls repositories, repositories grab data from network or cache, and data flows back to the screen as a steady stream.</p>
+
+    <div class="mermaid">
+flowchart TD
+    subgraph UI ["Presentation Layer"]
+        HSC["HomeScreenComponent"]
+        SSC["SettingsScreenComponent"]
+    end
+
+    subgraph Domain ["Domain Layer (Optional Use Cases)"]
+        GDA["GetTodayAgendaUseCase"]
+    end
+
+    subgraph Data ["Data Layer (Single Source of Truth)"]
+        WR["WeatherRepository"]
+        TR["TodoRepository"]
+        CR["CalendarRepository"]
+        UR["UserPreferencesRepository"]
+    end
+
+    subgraph Sources ["Data Sources"]
+        Ktor["Ktor Weather & Todoist API"]
+        LocalCache["In-Memory State / Cache"]
+        DS["Android Preferences DataStore"]
+        CalProvider["Android Calendar ContentResolver"]
+    end
+
+    HSC --> GDA
+    HSC --> WR
+    SSC --> UR
+    GDA --> WR
+    GDA --> TR
+    GDA --> CR
+
+    WR --> Ktor
+    WR --> LocalCache
+    TR --> Ktor
+    TR --> LocalCache
+    TR --> UR
+    UR --> DS
+    CR --> CalProvider
+    </div>
+
+    <h2>Four rules for the new data layer</h2>
+    <ol>
+      <li><strong>A repository gives you data, not booleans.</strong> When the UI asks the weather repository for weather, it gets <code>Flow&lt;WeatherData&gt;</code> back.</li>
+      <li><strong>Keep DataStore for settings only.</strong> Keep temperature units, theme choices, and login tokens in DataStore. Keep live weather and tasks in memory or in a real database.</li>
+      <li><strong>One preference store for the whole project.</strong> Delete <code>UserPreferencesStore</code>. Let one clean class manage settings keys.</li>
+      <li><strong>Run disk and network work in the background.</strong> Database and calendar queries must use <code>Dispatchers.IO</code> so the UI never drops frames.</li>
+    </ol>
+
+    <h2>Code comparisons</h2>
+
+    <h3>1. Weather repository</h3>
+    <p><strong>Before:</strong> The function returns <code>Boolean</code> after saving to disk.</p>
+    <pre><code>// Bad: WeatherRepo.kt
+interface WeatherRepo {
+    suspend fun getCurrentForecast(lat: Double, long: Double): Flow&lt;ProcessState&lt;Boolean&gt;&gt;
+}
+
+// In WeatherRepoImp.kt:
+dataStoreRepo.setWeatherData(weatherData)
+emit(ProcessState.Success(true))</code></pre>
+
+    <p><strong>After:</strong> The repository holds the latest weather and exposes it directly.</p>
+    <pre><code>// Good: WeatherRepository.kt
+interface WeatherRepository {
+    val weatherData: StateFlow&lt;WeatherData?&gt;
+    suspend fun refreshWeather(lat: Double, lon: Double): Result&lt;Unit&gt;
+}
+
+class WeatherRepositoryImpl(
+    private val api: WeatherRemoteDataSource
+) : WeatherRepository {
+    private val _weatherData = MutableStateFlow&lt;WeatherData?&gt;(null)
+    override val weatherData: StateFlow&lt;WeatherData?&gt; = _weatherData.asStateFlow()
+
+    override suspend fun refreshWeather(lat: Double, lon: Double): Result&lt;Unit&gt; {
+        return runCatching {
+            val dto = api.getForecast(lat, lon)
+            _weatherData.value = dto.toWeatherData()
+        }
+    }
+}</code></pre>
+
+    <h3>2. Todoist task management</h3>
+    <p><strong>Before:</strong> The screen checks tokens, triggers network calls, and listens to DataStore.</p>
+    <pre><code>// Bad: HomeScreenComponent.kt
+dataStoreRepo.todoistAccessToken.collectLatest { token ->
+    if (token != null) {
+        fetchTodoistTasks(token)
+    }
+}</code></pre>
+
+    <p><strong>After:</strong> The repository handles the token and gives the screen clean task data.</p>
+    <pre><code>// Good: TodoRepository.kt
+interface TodoRepository {
+    val tasks: Flow&lt;List&lt;TodoTask&gt;&gt;
+    val isConnected: Flow&lt;Boolean&gt;
+    suspend fun refreshTasks(): Result&lt;Unit&gt;
+    suspend fun disconnect()
+}</code></pre>
+
+    <h3>3. Calendar query on background thread</h3>
+    <p><strong>Before:</strong> Runs synchronously on the caller thread (which was <code>Dispatchers.Main</code>).</p>
+    <pre><code>// Bad: CalenderEventsImp.kt
+override fun getCalenderEvents(): List&lt;CalenderItems&gt; {
+    val cursor = context.contentResolver.query(uri, projection, null, null, null)
+    // runs on main thread
+}</code></pre>
+
+    <p><strong>After:</strong> Suspend function running on <code>Dispatchers.IO</code>.</p>
+    <pre><code>// Good: CalendarRepositoryImpl.kt
+class CalendarRepositoryImpl(private val context: Context) : CalendarRepository {
+    override suspend fun getTodayEvents(): List&lt;CalendarItem&gt; = withContext(Dispatchers.IO) {
+        val cursor = context.contentResolver.query(uri, projection, null, null, null)
+        // runs safely in background
+    }
+}</code></pre>
+
+    <h2>Step by step refactoring order</h2>
+    <ol>
+      <li><strong>Delete duplicate preference store:</strong> Remove <code>UserPreferencesStore.kt</code>. Merge its token and unit logic into a single <code>UserPreferencesRepository</code>.</li>
+      <li><strong>Fix calendar typo and threading:</strong> Rename <code>Calender</code> to <code>Calendar</code>. Wrap query calls in <code>withContext(Dispatchers.IO)</code>.</li>
+      <li><strong>Remove JSON cache from DataStore:</strong> Remove <code>WEATHER_DATA_KEY</code> and <code>TODO_DATA_KEY</code>. Store live data in repository state flows.</li>
+      <li><strong>Update repository interfaces:</strong> Change repository methods from <code>ProcessState&lt;Boolean&gt;</code> to return data or <code>Result&lt;Unit&gt;</code>.</li>
+      <li><strong>Thin out HomeScreenComponent:</strong> Let the screen component observe data from repositories instead of micro-managing token checks and disk writes.</li>
+    </ol>
+  </div>
+</body>
+</html>

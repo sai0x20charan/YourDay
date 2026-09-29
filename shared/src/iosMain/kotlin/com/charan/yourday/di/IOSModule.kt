@@ -2,16 +2,14 @@ package com.charan.yourday.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import com.charan.yourday.createDataStore
-import com.charan.yourday.data.repository.CalenderEventsRepo
-import com.charan.yourday.data.repository.LocationServiceRepo
-import com.charan.yourday.data.repository.impl.CalenderEventsImp
-import com.charan.yourday.data.repository.impl.LocationServiceImp
+import com.charan.yourday.data.datastore.createDataStore
+import com.charan.yourday.data.repository.CalendarEventsRepository
+import com.charan.yourday.data.repository.LocationServiceRepository
+import com.charan.yourday.data.repository.impl.CalendarEventsRepositoryImpl
+import com.charan.yourday.data.repository.impl.LocationServiceRepositoryImpl
 import com.charan.yourday.permission.PermissionManager
-import com.charan.yourday.permission.PermissionManagerImp
+import com.charan.yourday.permission.PermissionManagerImpl
 import com.charan.yourday.utils.PlatformSettings
-import dev.icerock.moko.permissions.ios.PermissionsController
-import dev.icerock.moko.permissions.ios.PermissionsControllerProtocol
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
 import org.koin.core.annotation.Configuration
@@ -23,19 +21,16 @@ import org.koin.plugin.module.dsl.startKoin
 @Configuration("app")
 actual class PlatformModule {
     @Single
-    fun provideLocationService(): LocationServiceRepo = LocationServiceImp()
-
-    @Single
-    fun providePermissionsController(): PermissionsControllerProtocol = PermissionsController()
+    fun provideLocationService(): LocationServiceRepository = LocationServiceRepositoryImpl()
 
     @Single
     fun provideHttpClientEngine(): HttpClientEngine = Darwin.create()
 
     @Single
-    fun providePermissionManager(): PermissionManager = PermissionManagerImp()
+    fun providePermissionManager(): PermissionManager = PermissionManagerImpl()
 
     @Single
-    fun provideCalenderEventsRepo(): CalenderEventsRepo = CalenderEventsImp()
+    fun provideCalendarEventsRepo(): CalendarEventsRepository = CalendarEventsRepositoryImpl()
 
     @Single
     fun providePlatformSettings(): PlatformSettings = PlatformSettings()
