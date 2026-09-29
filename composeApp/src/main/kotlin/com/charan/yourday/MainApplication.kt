@@ -2,8 +2,7 @@ package com.charan.yourday
 
 import android.app.Application
 import android.util.Log
-import com.charan.yourday.di.androidModule
-import com.charan.yourday.di.initKoin
+import com.charan.yourday.di.App
 import com.runanywhere.sdk.llm.llamacpp.LlamaCPP
 import com.runanywhere.sdk.public.RunAnywhere
 import com.splendo.kaluga.base.ApplicationHolder
@@ -13,6 +12,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import org.koin.plugin.module.dsl.startKoin
 
 class MainApplication : Application() {
 
@@ -21,11 +21,10 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         ApplicationHolder.applicationContext = this
-        initKoin {
-            androidContext(this@MainApplication)
-            modules(androidModule)
-            androidLogger()
 
+        startKoin<App> {
+            androidContext(this@MainApplication)
+            androidLogger()
         }
         // Register backend + init SDK once. Must happen before any
         // RunAnywhere.models / llm call, otherwise load fails with

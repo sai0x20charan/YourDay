@@ -1,24 +1,23 @@
 package com.charan.yourday.presentation.home
 
-import com.charan.yourday.data.model.CalenderItems
-import com.charan.yourday.data.model.TodoData
-import com.charan.yourday.data.model.TodoProvider
+import com.charan.yourday.data.model.CalendarItems
 import com.charan.yourday.utils.TodoProvidersEnums
 import com.charan.yourday.utils.WeatherUnitsEnums
 import dev.icerock.moko.resources.ImageResource
-import kotlinx.datetime.LocalDateTime
-
 
 data class HomeState(
     val weatherState: WeatherState = WeatherState(),
     val todoState: TodoState = TodoState(),
-    val calenderData: CalenderState = CalenderState(),
+    val calendarData: CalendarState = CalendarState(),
     val aiResponseState: AIResponseState = AIResponseState(),
     val isRefreshing: Boolean = false,
     val showDropDown: Boolean = false,
     val greetings: String = "",
     val currentDateTime: String = ""
-)
+) {
+    @Deprecated("Use calendarData instead", ReplaceWith("calendarData"))
+    val calenderData: CalendarState get() = calendarData
+}
 
 data class WeatherState(
     val isLoading: Boolean = false,
@@ -51,8 +50,11 @@ data class TodoState(
     val error: String? = null,
     val isTodoAuthenticated: Boolean = true,
     val todoToken: String? = null,
-    val lastSycned: String? = null
-)
+    val lastSynced: String? = null
+) {
+    @Deprecated("Use lastSynced instead", ReplaceWith("lastSynced"))
+    val lastSycned: String? get() = lastSynced
+}
 
 data class TodoDataState(
     val id: String = "",
@@ -62,14 +64,6 @@ data class TodoDataState(
     val date: String? = null,
     val todoProvider: String = TodoProvidersEnums.TODOIST.name,
     val todoImage: ImageResource? = null
-)
-
-data class CalenderState(
-    val calenderData: List<CalenderItems>? = null,
-    val isLoading: Boolean = false,
-    val isCalenderPermissionGranted: Boolean = true,
-    val error: String? = null,
-    val lastSycned: String? = null
 )
 
 data class AIResponseState(
@@ -82,3 +76,20 @@ data class AIResponseState(
     val showThinkingResponse: Boolean = true,
     val isThinking: Boolean = false
 )
+
+data class CalendarState(
+    val calendarData: List<CalendarItems>? = null,
+    val isLoading: Boolean = false,
+    val isCalendarPermissionGranted: Boolean = true,
+    val error: String? = null,
+    val lastSynced: String? = null
+) {
+    @Deprecated("Use calendarData instead", ReplaceWith("calendarData"))
+    val calenderData: List<CalendarItems>? get() = calendarData
+    @Deprecated("Use isCalendarPermissionGranted instead", ReplaceWith("isCalendarPermissionGranted"))
+    val isCalenderPermissionGranted: Boolean get() = isCalendarPermissionGranted
+    @Deprecated("Use lastSynced instead", ReplaceWith("lastSynced"))
+    val lastSycned: String? get() = lastSynced
+}
+
+typealias CalenderState = CalendarState

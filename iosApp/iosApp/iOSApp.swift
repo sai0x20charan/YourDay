@@ -3,7 +3,7 @@ import Firebase
 import Shared
 
 @main
-struct iOSApp: App {
+struct iOSApp: SwiftUI.App {
     
     @State private var componentHolder: ComponentHolder<RootComponent>
     @State private var authentizationId : String? = nil
@@ -13,7 +13,7 @@ struct iOSApp: App {
         FirebaseApp.configure()
         KointInitHelper().doInitKoin()
         
-        _componentHolder = State(initialValue: ComponentHolder {context in
+        _componentHolder = State(initialValue: ComponentHolder { context in
             RootComponent(
                 authorizationId: nil,
                 errorCode: nil,
@@ -37,9 +37,6 @@ struct iOSApp: App {
                         errorCode = errorParam.components(separatedBy: ",").first
                     }
 
-                    print("Code for the Todoist is:", code ?? "nil")
-                    print("Error code:", errorCode ?? "nil")
-
                     self.componentHolder = ComponentHolder { context in
                         RootComponent(
                             authorizationId: code,
@@ -50,6 +47,4 @@ struct iOSApp: App {
                 }
         }
     }
-
 }
-

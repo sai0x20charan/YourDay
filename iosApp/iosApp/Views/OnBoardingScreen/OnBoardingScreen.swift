@@ -15,10 +15,10 @@ import CalendarPermission
 import LocationPermission
 
 struct OnBoardingScreen: View {
-    let component: Shared.HomeScreenComponent
-    @State var homeState: Shared.HomeState?
+    let component: Shared.OnBoardingScreenComponent
+    @State var onBoardingState: Shared.OnBoardingState?
     
-    init(_ component: HomeScreenComponent) {
+    init(_ component: Shared.OnBoardingScreenComponent) {
         self.component = component
     }
     
@@ -52,9 +52,9 @@ struct OnBoardingScreen: View {
                         systemImage: "location.fill",
                         buttonTitle: "Enable Location",
                         action: {
-                            component.onEvent(intent: HomeEventRequestLocationPermission(showRationale: false))
+                            component.onEvent(event: OnBoardingEventRequestLocationPermission.shared)
                         },
-                        isPermissionGranted: homeState?.weatherState.isLocationPermissionGranted == true
+                        isPermissionGranted: onBoardingState?.isLocationPermissionGranted == true
                     )
                     
                     Divider()
@@ -66,9 +66,9 @@ struct OnBoardingScreen: View {
                         systemImage: "calendar",
                         buttonTitle: "Grant Access",
                         action: {
-                            component.onEvent(intent: HomeEventRequestCalendarPermission(showRationale: false))
+                            component.onEvent(event: OnBoardingEventRequestCalendarPermission.shared)
                         },
-                        isPermissionGranted: homeState?.calenderData.isCalenderPermissionGranted == true
+                        isPermissionGranted: onBoardingState?.isCalendarPermissionGranted == true
                     )
                     
                     Divider()
@@ -80,9 +80,9 @@ struct OnBoardingScreen: View {
                         systemImage: "checklist",
                         buttonTitle: "Connect Todoist",
                         action: {
-                            component.onEvent(intent: HomeEventConnectTodoist())
+                            component.onEvent(event: OnBoardingEventConnectTodoist.shared)
                         },
-                        isPermissionGranted: homeState?.todoState.isTodoAuthenticated == true
+                        isPermissionGranted: onBoardingState?.isTodoistConnected == true
                     )
                     
                     Divider()
@@ -90,7 +90,7 @@ struct OnBoardingScreen: View {
             }
             .safeAreaInset(edge: .bottom) {
                 Button {
-                    component.onEvent(intent: HomeEventOnBoardingFinish())
+                    component.onEvent(event: OnBoardingEventFinish.shared)
                 } label: {
                     Text("Get Started")
                         .frame(maxWidth: .infinity)
@@ -98,7 +98,6 @@ struct OnBoardingScreen: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .padding()
-                
             }
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -109,9 +108,9 @@ struct OnBoardingScreen: View {
     
     private func observeState() {
         Task {
-            for await state in component.state {
+            for await state in component.onBoardingState {
                 await MainActor.run {
-                    self.homeState = state
+                    self.onBoardingState = state
                 }
             }
         }
@@ -159,13 +158,11 @@ struct PermissionRow: View {
                 } else {
                     Button(action: action) {
                         Text(buttonTitle)
-                            .font(.caption)
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                    .buttonStyle(.borderedProminent)
                 }
             }
-            .padding(.trailing, 16)
+            .padding(.horizontal, 16)
         }
     }
 }

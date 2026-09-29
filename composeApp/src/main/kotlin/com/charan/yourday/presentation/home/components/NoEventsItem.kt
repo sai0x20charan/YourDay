@@ -13,19 +13,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.charan.yourday.MR
+import com.charan.yourday.calender
 import dev.icerock.moko.resources.compose.painterResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-
 fun NoEventItem() {
-    Column (modifier = Modifier.fillMaxSize().padding(top = 20.dp),
+    Column(
+        modifier = Modifier.fillMaxSize().padding(top = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center){
-        Image(painter = painterResource(MR.images.calender),null,modifier= Modifier.padding(bottom = 20.dp))
-        Text("Your calender is clear", style = MaterialTheme.typography.labelLargeEmphasized,modifier= Modifier.padding(bottom = 10.dp))
-        Text("Enjoy your peaceful day ahead", style = MaterialTheme.typography.labelSmallEmphasized)
-
-
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(MR.images.calender),
+            contentDescription = null,
+            modifier = Modifier.padding(bottom = 20.dp)
+        )
+        Text(
+            "Your calendar is clear",
+            style = MaterialTheme.typography.labelLargeEmphasized,
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
+        Text(
+            "Enjoy your peaceful day ahead",
+            style = MaterialTheme.typography.labelSmallEmphasized
+        )
     }
 }

@@ -9,9 +9,10 @@ import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.router.stack.replaceCurrent
 import com.arkivanov.decompose.value.Value
+import com.charan.yourday.data.repository.UserPreferencesRepository
 import com.charan.yourday.presentation.home.HomeScreenComponent
+import com.charan.yourday.presentation.onboarding.OnBoardingScreenComponent
 import com.charan.yourday.presentation.settings.SettingsScreenComponent
-import com.charan.yourday.utils.UserPreferencesStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,13 +26,14 @@ class RootComponent(
     var authorizationId: String? = null,
     var errorCode: String? = null,
     componentContext: ComponentContext
-) : ComponentContext by componentContext, KoinComponent{
-    private val userPreferences: UserPreferencesStore = get()
+) : ComponentContext by componentContext, KoinComponent {
+    private val userPreferencesRepository: UserPreferencesRepository = get()
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     init {
         coroutineScope.launch {
-            val shouldShowOnBoarding = userPreferences.shouldShowOnboarding.first()
-            if(shouldShowOnBoarding) navigation.replaceCurrent(Configuration.OnBoardingScreen(authorizationId,errorCode))
+            val shouldShowOnBoarding = userPreferencesRepository.shouldShowOnboarding.first()
+            if (shouldShowOnBoarding) navigation.replaceCurrent(Configuration.OnBoardingScreen(authorizationId, errorCode))
         }
     }
 
@@ -43,20 +45,20 @@ class RootComponent(
              Configuration.HomeScreen(authorizationId, errorCode),
         handleBackButton = true,
         childFactory = ::createChild,
-
     )
-    fun onBackClicked(){
+
+    fun onBackClicked() {
         navigation.pop()
     }
 
     private fun createChild(
-        config:  Configuration,
-        context : ComponentContext
-    ) : Child{
-        return when(config) {
+        config: Configuration,
+        context: ComponentContext
+    ): Child {
+        return when (config) {
             is Configuration.HomeScreen -> Child.HomeScreen(
                 HomeScreenComponent(
-                    componentContext=context,
+                    componentContext = context,
                     authorizationId = config.authorizationId,
                     errorCode = config.errorCode,
                     onSettingsOpen = {
@@ -73,11 +75,12 @@ class RootComponent(
                     onLicenseClick = {
                         navigation.pushNew(Configuration.LicenseScreen)
                     }
-                ))
+                )
+            )
 
             Configuration.LicenseScreen -> Child.LicenseScreen(
                 SettingsScreenComponent(
-                componentContext = context,
+                    componentContext = context,
                     onBackClick = {
                         onBackClicked()
                     }
@@ -85,42 +88,38 @@ class RootComponent(
             )
 
             is Configuration.OnBoardingScreen -> Child.OnBoardingScreen(
-                component = HomeScreenComponent(
+                component = OnBoardingScreenComponent(
                     componentContext = context,
                     authorizationId = config.authorizationId,
-                    errorCode = config.error,
-                    onBoardFinish = {
+                    onFinish = {
                         finishOnBoard()
                     }
-
                 )
             )
         }
-
     }
 
     private fun finishOnBoard() = coroutineScope.launch {
-        userPreferences.setShouldShowOnboarding(false)
-        navigation.replaceAll(Configuration.HomeScreen(authorizationId,errorCode))
+        userPreferencesRepository.setShouldShowOnboarding(false)
+        navigation.replaceAll(Configuration.HomeScreen(authorizationId, errorCode))
     }
 
     sealed class Child {
         data class HomeScreen(val component: HomeScreenComponent) : Child()
-        data class SettingsScreen(val component : SettingsScreenComponent) : Child()
-        data class LicenseScreen(val component : SettingsScreenComponent) : Child()
-        data class OnBoardingScreen(val component: HomeScreenComponent) : Child()
+        data class SettingsScreen(val component: SettingsScreenComponent) : Child()
+        data class LicenseScreen(val component: SettingsScreenComponent) : Child()
+        data class OnBoardingScreen(val component: OnBoardingScreenComponent) : Child()
     }
+
     @Serializable
-    sealed class  Configuration {
+    sealed class Configuration {
         @Serializable
-        data class HomeScreen(val authorizationId : String?,val errorCode : String?) : Configuration()
+        data class HomeScreen(val authorizationId: String?, val errorCode: String?) : Configuration()
         @Serializable
         object SettingsScreen : Configuration()
         @Serializable
         object LicenseScreen : Configuration()
         @Serializable
-        data class OnBoardingScreen(val authorizationId: String?,val error : String ?) : Configuration()
+        data class OnBoardingScreen(val authorizationId: String?, val error: String?) : Configuration()
     }
-
-
 }

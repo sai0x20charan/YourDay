@@ -1,36 +1,53 @@
 package com.charan.yourday.di
 
-
-import android.app.Activity
-import com.charan.yourday.createDataStore
-import com.charan.yourday.data.repository.CalenderEventsRepo
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.charan.yourday.data.datastore.createDataStore
+import com.charan.yourday.data.repository.CalendarEventsRepository
 import com.charan.yourday.data.repository.LocalLLMRepository
-import com.charan.yourday.data.repository.LocationServiceRepo
-import com.charan.yourday.data.repository.impl.CalenderEventsImp
+import com.charan.yourday.data.repository.LocationServiceRepository
+import com.charan.yourday.data.repository.impl.CalendarEventsRepositoryImpl
 import com.charan.yourday.data.repository.impl.LocalLLMRepositoryImpl
-import com.charan.yourday.data.repository.impl.LocationServiceImp
+import com.charan.yourday.data.repository.impl.LocationServiceRepositoryImpl
 import com.charan.yourday.permission.PermissionManager
-import com.charan.yourday.permission.PermissionManagerImp
+import com.charan.yourday.permission.PermissionManagerImpl
 import com.charan.yourday.utils.PlatformSettings
-import dev.icerock.moko.permissions.PermissionsController
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
-import org.koin.android.ext.koin.androidApplication
+import org.koin.core.annotation.Configuration
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 
-import org.koin.android.ext.koin.androidContext
-import org.koin.dsl.module
+@Module
+@Configuration("app")
+actual class PlatformModule {
+    @Factory
+    fun provideLocationService(context: Context): LocationServiceRepository =
+        LocationServiceRepositoryImpl(context = context)
 
-val androidModule = module {
-    single { PermissionsController(applicationContext = androidContext()) }
-    factory   <LocationServiceRepo>{ LocationServiceImp(context = androidContext())  }
-    single { OkHttp.create() }
-    factory<PermissionManager> {
-        PermissionManagerImp(
-            context = androidContext(),
-        )
-    }
-    single <CalenderEventsRepo> { CalenderEventsImp(context = androidContext())}
-    single <PlatformSettings>{ PlatformSettings(context = androidContext()) }
-    single { createDataStore(get()) }
-    single <LocalLLMRepository>{ LocalLLMRepositoryImpl(get()) }
+    @Single
+    fun provideHttpClientEngine(): HttpClientEngine =
+        OkHttp.create()
 
+    @Factory
+    fun providePermissionManager(context: Context): PermissionManager =
+        PermissionManagerImpl(context = context)
+
+    @Single
+    fun provideCalendarEventsRepo(context: Context): CalendarEventsRepository =
+        CalendarEventsRepositoryImpl(context = context)
+
+    @Single
+    fun providePlatformSettings(context: Context): PlatformSettings =
+        PlatformSettings(context = context)
+
+    @Single
+    fun provideDataStore(context: Context): DataStore<Preferences> =
+        createDataStore(context)
+
+    @Single
+    fun provideLocalLLMRepository(context: Context): LocalLLMRepository =
+        LocalLLMRepositoryImpl(context = context)
 }

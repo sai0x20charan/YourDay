@@ -45,13 +45,13 @@ object SummaryPromptBuilder {
                 }
                 val overdueCount = todos.count { it.isOverDue }
                 if (overdueCount > 0) {
-                    appendLine("$overdueCount overdue task${if (overdueCount > 1) "s" else ""} from previous days.")
+                    appendLine("$overdueCount overdue task${if (overdueCount > 1) "s" else "" } from previous days.")
                 }
             }
             appendLine()
             // Calendar
             appendLine("Calendar Events:")
-            val events = currentState.calenderData.calenderData ?: emptyList()
+            val events = currentState.calendarData.calendarData ?: emptyList()
             if (events.isEmpty()) {
                 appendLine("No events scheduled today.")
             } else {

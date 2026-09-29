@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
     alias(libs.plugins.mikepenz.aboutlibrary.android)
-
+    alias(libs.plugins.koin.compiler)
 }
 
 kotlin {
@@ -18,42 +18,41 @@ kotlin {
     sourceSets {
 
         dependencies {
-            implementation(libs.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.runtime)
             implementation(libs.foundation)
             implementation(libs.material)
-            implementation(libs.androidx.material)
-//            implementation(compose.material3)
             implementation(libs.material.icons.extended)
             implementation(libs.ui)
             implementation(libs.components.resources)
             implementation(libs.ui.tooling.preview)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(projects.shared)
             api(libs.resources.compose)
+
+            // Firebase BOM
+            implementation(platform(libs.firebase.bom))
+            implementation(libs.firebase.crashlytics)
+
+            // Koin BOM
+            implementation(platform(libs.koin.bom))
             implementation(libs.koin.android)
             implementation(libs.koin.core)
+            implementation(libs.koin.annotations)
             implementation(libs.koin.compose)
             implementation(libs.koin.androidx.compose)
-            implementation (libs.accompanist.permissions)
+
+            implementation(libs.accompanist.permissions)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.multiplatform.markdown.renderer.m3)
             implementation(libs.richeditor.compose)
             implementation(libs.decompose)
             implementation(libs.decompose.jetbrains)
-            implementation(libs.decompose.jetbrains.experiment)
             implementation(libs.androidx.core.splashscreen)
-            implementation (libs.androidx.graphics.shapes)
             implementation(libs.material3)
-            implementation(libs.firebase.crashlytics)
             debugImplementation(libs.ui.tooling)
-            implementation (libs.aboutlibraries.core)
+            implementation(libs.aboutlibraries.core)
             implementation(libs.aboutlibraries.compose.m3)
-
-
         }
     }
 }
@@ -100,7 +99,7 @@ android {
         create("release") {
             keyAlias = getLocalProperty("KEY_ALIAS")
             keyPassword = getLocalProperty("KEY_PASSWORD")
-            storeFile = file(getLocalProperty("KEY_LOCATION") ?: "")
+            storeFile = getLocalProperty("KEY_LOCATION")?.takeIf { it.isNotBlank() }?.let { file(it) }
             storePassword = getLocalProperty("KEY_STORE_PASSWORD")
         }
     }

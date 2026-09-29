@@ -7,7 +7,6 @@ import com.charan.yourday.presentation.home.ForecastWeatherState
 import com.charan.yourday.presentation.home.TodoDataState
 import com.charan.yourday.utils.DateUtils.toMMMDYYYYWithTime
 import com.charan.yourday.utils.DateUtils.toTimeString
-import com.charan.yourday.utils.TodoProvidersEnums
 import com.charan.yourday.utils.WeatherIconName
 import com.charan.yourday.utils.WeatherUnitsEnums
 import com.charan.yourday.utils.getProviderLogo

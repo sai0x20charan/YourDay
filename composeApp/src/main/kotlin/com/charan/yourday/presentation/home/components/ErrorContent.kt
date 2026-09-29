@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.charan.yourday.MR
+import com.charan.yourday.*
 import dev.icerock.moko.resources.compose.painterResource
 
 @Composable

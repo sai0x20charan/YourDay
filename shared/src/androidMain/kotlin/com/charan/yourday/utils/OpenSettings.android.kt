@@ -3,10 +3,6 @@ package com.charan.yourday.utils
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import org.koin.compose.getKoin
-import org.koin.core.context.GlobalContext.get
-import org.koin.core.context.KoinContext
-
 
 actual class PlatformSettings (private val context: Context){
     actual fun openSettings(): Boolean {

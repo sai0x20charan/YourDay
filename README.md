@@ -15,7 +15,7 @@ Your Day provides a quick overview of the current weather, your calendar events 
 
 ## Features
 - **Current Weather:** Displays temperature, conditions, and forecast for today
-- **Calendar Events:** Shows your scheduled events for the current day from local calender
+- **Calendar Events:** Shows your scheduled events for the current day from local calendar
 - **Todoist Tasks:** Lists your tasks for the day synced from your Todoist account
 - **Settings:** Customize units (Fahrenheit/Celsius), disconnect Todoist account.
 - **Cross-Platform:** Works on both Android and iOS with shared business logic

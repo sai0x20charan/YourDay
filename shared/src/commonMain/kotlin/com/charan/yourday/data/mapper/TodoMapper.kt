@@ -1,8 +1,8 @@
 package com.charan.yourday.data.mapper
 
 import com.charan.yourday.data.model.TodoData
-import com.charan.yourday.data.network.responseDTO.TodoistTaskDTO
-import com.charan.yourday.data.network.responseDTO.TodoistTodayTasksResponseDTO
+import com.charan.yourday.data.network.dto.TodoistTaskDTO
+import com.charan.yourday.data.network.dto.TodoistTodayTasksResponseDTO
 import com.charan.yourday.utils.DateUtils.isOverDue
 import com.charan.yourday.utils.DateUtils.toLocalDateTime
 import com.charan.yourday.utils.TodoProvidersEnums
