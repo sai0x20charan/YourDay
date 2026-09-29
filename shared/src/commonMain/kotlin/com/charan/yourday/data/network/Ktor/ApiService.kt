@@ -58,12 +58,12 @@ class ApiService(val client: HttpClient) {
         return client.get {
             url {
                 host = todoist_api_url
-                path("api/v1/tasks/filter")
-                parameters.append("query", "today|overdue")
-            }
-            headers {
-                append("Authorization", "Bearer $code")
-                append("Accept", "application/json")
+                headers {
+                    append("Authorization", "Bearer $code")
+                    append("Accept", "application/json")
+                }
+                path("api/v1/tasks")
+                parameters.append("filter", "today|overdue")
             }
         }
     }

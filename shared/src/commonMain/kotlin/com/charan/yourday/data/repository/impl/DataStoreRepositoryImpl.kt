@@ -23,7 +23,6 @@ class DataStoreRepositoryImpl(
         private val WEATHER_DATA_KEY = stringPreferencesKey("weather_data")
 
         private val TODO_DATA_KEY = stringPreferencesKey("todo_data")
-        private val MODEL_DOWNLOADED_KEY = booleanPreferencesKey("model_downloaded")
     }
 
     override val weatherUnit: Flow<WeatherUnitsEnums>
@@ -90,17 +89,6 @@ class DataStoreRepositoryImpl(
         val data = Json.encodeToString(todoData)
         dataStore.edit { preferences ->
             preferences[TODO_DATA_KEY] = data
-        }
-    }
-
-    override val isModelDownloaded: Flow<Boolean>
-        get() = dataStore.data.map { preferences ->
-            preferences[MODEL_DOWNLOADED_KEY] ?: false
-        }
-
-    override suspend fun setModelDownloaded(isDownloaded: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[MODEL_DOWNLOADED_KEY] = isDownloaded
         }
     }
 }

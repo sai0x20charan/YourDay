@@ -17,19 +17,19 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-class SettingsScreenComponent (
+class SettingsScreenComponent(
     componentContext: ComponentContext,
-    val onBackClick : () -> Unit,
-    val onLicenseClick : () -> Unit ={},
-
-) : KoinComponent, ComponentContext by componentContext{
+    val onBackClick: () -> Unit,
+    val onLicenseClick: () -> Unit = {},
+) : KoinComponent, ComponentContext by componentContext {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private val userPreferences : UserPreferencesStore = get()
+    private val userPreferences: UserPreferencesStore = get()
     private val todoistRepo: TodoistRepo = get()
-    private val localLLMRepository : LocalLLMRepository = get()
+    private val localLLMRepository: LocalLLMRepository = get()
 
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState = _settingsState.asStateFlow()
+
     init {
         getSetTemperatureUnits()
         isTodoConnected()
@@ -37,7 +37,7 @@ class SettingsScreenComponent (
         isAIModelDownloaded()
     }
 
-    private fun getSetTemperatureUnits() = coroutineScope.launch{
+    private fun getSetTemperatureUnits() = coroutineScope.launch {
         userPreferences.weatherUnits.collectLatest {
             updateSettingsState(
                 weatherUnits = it
@@ -50,15 +50,18 @@ class SettingsScreenComponent (
             appVersion = appVersion()
         )
     }
-    private fun setTemperature(weatherUnits : String) = coroutineScope.launch {
-       userPreferences.setWeatherUnits(weatherUnits)
+
+    private fun setTemperature(weatherUnits: String) = coroutineScope.launch {
+        userPreferences.setWeatherUnits(weatherUnits)
     }
+
     private fun deleteTodoistToken() = coroutineScope.launch {
         userPreferences.deleteTodoistToken()
     }
+
     private fun isTodoConnected() = coroutineScope.launch {
         userPreferences.todoistAccessToken.collectLatest {
-            if(it !=null){
+            if (it != null) {
                 updateSettingsState(
                     isTodoistConnected = true
                 )
@@ -68,16 +71,16 @@ class SettingsScreenComponent (
                 )
             }
         }
-
     }
 
     private fun downloadAIModel() = coroutineScope.launch {
         localLLMRepository.downloadModel().collectLatest { processState ->
-            when(processState){
+            when (processState) {
                 is ProcessState.Loading -> {
                     _settingsState.update {
                         it.copy(
                             aiModelState = it.aiModelState.copy(
+                                isModelDownloading = true,
                                 downloadProgress = processState.progress
                             )
                         )
@@ -96,8 +99,13 @@ class SettingsScreenComponent (
                 }
 
                 is ProcessState.Error -> {
-
-
+                    _settingsState.update {
+                        it.copy(
+                            aiModelState = it.aiModelState.copy(
+                                isModelDownloading = false
+                            )
+                        )
+                    }
                 }
 
                 else -> {}
@@ -106,21 +114,32 @@ class SettingsScreenComponent (
     }
 
     private fun deleteAIModel() = coroutineScope.launch {
-
-
+        localLLMRepository.deleteModel().collectLatest { processState ->
+            when (processState) {
+                is ProcessState.Success -> {
+                    _settingsState.update {
+                        it.copy(
+                            aiModelState = it.aiModelState.copy(
+                                isModelDownloaded = false
+                            )
+                        )
+                    }
+                }
+                else -> {}
+            }
+        }
     }
 
-
-    fun onEvent(event : SettingsEvents) = coroutineScope.launch{
-        when(event){
+    fun onEvent(event: SettingsEvents) = coroutineScope.launch {
+        when (event) {
             is SettingsEvents.OnChangeWeatherUnits -> {
                 setTemperature(event.weatherUnit)
             }
 
             SettingsEvents.TodoConnect -> {
-                if(_settingsState.value.isTodoistConnected==false){
+                if (_settingsState.value.isTodoistConnected == false) {
                     todoistRepo.requestAuthorization()
-                } else{
+                } else {
                     deleteTodoistToken()
                 }
             }
@@ -131,7 +150,6 @@ class SettingsScreenComponent (
 
             SettingsEvents.OnLicenseNavigate -> {
                 onLicenseClick()
-
             }
 
             SettingsEvents.OnDownloadAIModel -> {
@@ -141,22 +159,20 @@ class SettingsScreenComponent (
             SettingsEvents.OnDeleteAIModel -> {
                 deleteAIModel()
             }
-            else -> {}
         }
     }
 
     private fun updateSettingsState(
-        weatherUnits: String? =null,
-        isTodoistConnected : Boolean? =null,
-        appVersion : String?=null
+        weatherUnits: String? = null,
+        isTodoistConnected: Boolean? = null,
+        appVersion: String? = null
     ) {
         _settingsState.update {
             it.copy(
                 weatherUnits = weatherUnits ?: it.weatherUnits,
-                isTodoistConnected =  isTodoistConnected ?: it.isTodoistConnected,
+                isTodoistConnected = isTodoistConnected ?: it.isTodoistConnected,
                 appVersion = appVersion ?: it.appVersion
             )
-
         }
     }
 
@@ -169,7 +185,5 @@ class SettingsScreenComponent (
                 )
             )
         }
-
-
     }
 }

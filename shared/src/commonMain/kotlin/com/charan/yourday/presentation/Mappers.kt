@@ -1,4 +1,4 @@
-package com.charan.yourday.presentation.utils
+package com.charan.yourday.presentation
 
 import com.charan.yourday.data.model.TodoData
 import com.charan.yourday.data.model.WeatherData
@@ -7,6 +7,7 @@ import com.charan.yourday.presentation.home.ForecastWeatherState
 import com.charan.yourday.presentation.home.TodoDataState
 import com.charan.yourday.utils.DateUtils.toMMMDYYYYWithTime
 import com.charan.yourday.utils.DateUtils.toTimeString
+import com.charan.yourday.utils.TodoProvidersEnums
 import com.charan.yourday.utils.WeatherIconName
 import com.charan.yourday.utils.WeatherUnitsEnums
 import com.charan.yourday.utils.getProviderLogo
@@ -42,7 +43,6 @@ fun List<WeatherData>.toForecastWeatherState(units : WeatherUnitsEnums) : List<F
 fun List<TodoData>.toTodoDataState() : List<TodoDataState>{
     return this.map {
         TodoDataState(
-            id = it.id,
             taskName = it.tasks ?: "",
             taskLink = it.taskLink ?: "",
             isOverDue = it.isOverDue ?: false,

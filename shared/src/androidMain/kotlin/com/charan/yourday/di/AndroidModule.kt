@@ -3,11 +3,9 @@ package com.charan.yourday.di
 
 import android.app.Activity
 import com.charan.yourday.createDataStore
-import com.charan.yourday.data.repository.A2uiRepository
 import com.charan.yourday.data.repository.CalenderEventsRepo
 import com.charan.yourday.data.repository.LocalLLMRepository
 import com.charan.yourday.data.repository.LocationServiceRepo
-import com.charan.yourday.data.repository.impl.A2uiRepositoryImpl
 import com.charan.yourday.data.repository.impl.CalenderEventsImp
 import com.charan.yourday.data.repository.impl.LocalLLMRepositoryImpl
 import com.charan.yourday.data.repository.impl.LocationServiceImp
@@ -34,6 +32,5 @@ val androidModule = module {
     single <PlatformSettings>{ PlatformSettings(context = androidContext()) }
     single { createDataStore(get()) }
     single <LocalLLMRepository>{ LocalLLMRepositoryImpl(get()) }
-    single <A2uiRepository>{ A2uiRepositoryImpl() }
 
 }

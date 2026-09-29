@@ -1,10 +1,8 @@
 package com.charan.yourday.di
 
-import com.cactus.CactusLM
 import com.charan.yourday.data.network.Ktor.ApiService
 import com.charan.yourday.data.network.Ktor.createHttpClient
 import com.charan.yourday.data.repository.DataStoreRepository
-import com.charan.yourday.data.repository.LocalLLMRepository
 import com.charan.yourday.data.repository.TodoistRepo
 import com.charan.yourday.data.repository.WeatherRepo
 import com.charan.yourday.data.repository.impl.DataStoreRepositoryImpl
@@ -34,8 +32,6 @@ import org.koin.dsl.module
                     this.registerCalendarPermissionIfNotRegistered()
                 }
         }
-
-        single <CactusLM>{ CactusLM() }
 
     }
 

@@ -15,6 +15,7 @@ struct TodoCard: View {
     var onTodoOpen: ((_ url : String) -> Void )
 
     var body: some View {
+        let _ = print(todoState)
         ContentCard(
             title: "Today's Tasks",
             isLoading: Binding(get: {todoState?.isLoading == true}, set: {_ in}),

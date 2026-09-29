@@ -1,9 +1,6 @@
 package com.charan.yourday.presentation.home
 
-import android.Manifest
-import android.util.Log
 import android.widget.Toast
-import androidx.a2ui.model.processor.A2uiSurfaceModel
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -24,11 +21,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -38,29 +35,24 @@ import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.a2ui.A2uiSurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.charan.yourday.presentation.common.CustomDropDown
+import com.charan.yourday.presentation.common.DropDownItem
 import com.charan.yourday.presentation.home.components.AIResponseCard
 import com.charan.yourday.presentation.home.components.CalendarCard
 import com.charan.yourday.presentation.home.components.TodoCard
 import com.charan.yourday.presentation.home.components.WeatherCard
-import com.charan.yourday.utils.DateUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class,
@@ -68,23 +60,30 @@ import kotlinx.coroutines.flow.collectLatest
 )
 @Composable
 fun HomeScreen(
-    component : HomeScreenComponent,
+    component: HomeScreenComponent,
 ) {
+    val state by component.state.collectAsState()
     val context = LocalContext.current
-    val homeState by component.state.collectAsState()
 
+    LaunchedEffect(component.effects) {
+        component.effects.collectLatest {
+            when (it) {
+                is HomeEffect.ShowToast -> {
+                    Toast.makeText(context, it.message, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 
-    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-    val calenderPermissionState = rememberPermissionState(Manifest.permission.READ_CALENDAR)
     val scroll = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val pullToRefreshState = rememberPullRefreshState(
-        refreshing = homeState.isRefreshing,
-        onRefresh = {component.onEvent(HomeEvent.RefreshData)},
+        refreshing = state.isRefreshing,
+        onRefresh = { component.onEvent(HomeEvent.RefreshData) },
     )
     val listState = rememberLazyListState()
     val isThresholdReached by remember {
         derivedStateOf {
-            pullToRefreshState.progress.dp >=1.dp
+            pullToRefreshState.progress.dp >= 1.dp
         }
     }
     val isPulledDown by remember {
@@ -92,123 +91,73 @@ fun HomeScreen(
             pullToRefreshState.progress.dp > 0.dp
         }
     }
-
-    var showDropDown by remember { mutableStateOf(false) }
-
-    val surfaces by component.surfaces.collectAsState()
-
-    LaunchedEffect(component.effects) {
-        component.effects.collectLatest {
-            when (it) {
-                is HomeViewEffect.ShowToast -> {
-                    Toast.makeText(context, it.message, Toast.LENGTH_LONG).show()
-                }
-
-                HomeViewEffect.RequestCalenderPermission -> {
-                    calenderPermissionState.launchPermissionRequest()
-                }
-
-                HomeViewEffect.RequestLocationPermission -> {
-                    locationPermissionState.launchPermissionRequest()
-                }
-            }
-        }
-    }
-    LaunchedEffect(locationPermissionState.status) {
-        when (locationPermissionState.status) {
-            is PermissionStatus.Denied -> {}
-            PermissionStatus.Granted -> {
-                Log.d("TAG", "HomeScreen: granted")
-                component.onEvent(HomeEvent.FetchWeather)
-            }
-        }
-    }
-    LaunchedEffect(calenderPermissionState.status) {
-        when (calenderPermissionState.status) {
-            is PermissionStatus.Denied -> {}
-            PermissionStatus.Granted -> {
-                component.onEvent(HomeEvent.FetchCalendarEvents)
-
-            }
-        }
-    }
-
-
-
-
     Scaffold(
         topBar = {
             LargeFlexibleTopAppBar(
                 title = {
-                   Text(DateUtils.getGreeting())
-
+                    Text(state.greetings)
                 },
                 subtitle = {
-                    Text(DateUtils.getDateInDDMMYYYY())
+                    Text(state.currentDateTime)
                 },
                 scrollBehavior = scroll,
                 actions = {
                     IconButton(
                         onClick = {
-                            showDropDown = true
+                            component.onEvent(HomeEvent.ShowDropdownMenu(true))
                         },
                         shapes = IconButtonDefaults.shapes(),
-
                     ) {
                         Icon(Icons.Default.MoreVert, "More")
                     }
-                    DropdownMenu(
-                        expanded = showDropDown,
-                        onDismissRequest = {
-                            showDropDown = false
-                        }
-                    ) {
-                        DropdownMenuItem(
-                            onClick = {
-                                showDropDown = false
-                                component.onEvent(HomeEvent.OpenSettingsPage)
-                            },
-                            text = {
-                                Text("Settings")
+                    CustomDropDown(
+                        items = dropdownItems,
+                        onItemSelected = { dropDownItem, index ->
+                            when (index) {
+                                0 -> component.onEvent(HomeEvent.OpenSettingsPage)
+                                1 -> component.onEvent(HomeEvent.RefreshData)
                             }
-                        )
-                    }
+                        },
+                        isExpanded = state.showDropDown,
+                        onDismiss = {
+                            component.onEvent(HomeEvent.ShowDropdownMenu(false))
+                        }
+                    )
                 }
             )
-
         },
         modifier = Modifier
     ) { padding ->
 
-
-
-            LazyColumn(
-                state = listState,
-                contentPadding = padding,
-                modifier = Modifier
-                    .nestedScroll(scroll.nestedScrollConnection)
-                    .fillMaxSize()
-                    .pullRefresh(state = pullToRefreshState)
-                    .offset(y = pullToRefreshState.progress.dp * 8)
-                    .padding(15.dp)
-
-            ) {
-                item {
-                    AnimatedVisibility(
-                        modifier = Modifier,
-                        visible = isPulledDown,
-                        enter = scaleIn() + expandVertically(expandFrom = Alignment.CenterVertically),
-                        exit = scaleOut() + shrinkVertically(shrinkTowards = Alignment.CenterVertically)
-
-
-                    ) {
-                    Box (
+        LazyColumn(
+            state = listState,
+            contentPadding = padding,
+            modifier = Modifier
+                .nestedScroll(scroll.nestedScrollConnection)
+                .fillMaxSize()
+                .pullRefresh(state = pullToRefreshState)
+                .offset(y = pullToRefreshState.progress.dp * 8)
+                .padding(15.dp)
+        ) {
+            item {
+                AnimatedVisibility(
+                    modifier = Modifier,
+                    visible = isPulledDown,
+                    enter = scaleIn() + expandVertically(expandFrom = Alignment.CenterVertically),
+                    exit = scaleOut() + shrinkVertically(shrinkTowards = Alignment.CenterVertically)
+                ) {
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp),
-                        contentAlignment = Alignment.Center) {
-                        Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                            val refreshText = if(isThresholdReached) "Release to refresh" else "Pull to refresh"
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val refreshText =
+                                if (isThresholdReached) "Release to refresh" else "Pull to refresh"
                             CircularWavyProgressIndicator(
                                 progress = {
                                     pullToRefreshState.progress
@@ -216,86 +165,68 @@ fun HomeScreen(
                                 modifier = Modifier.size(25.dp),
                             )
                             Spacer(Modifier.padding(end = 8.dp))
-                            Text(refreshText,modifier = Modifier.animateContentSize())
+                            Text(refreshText, modifier = Modifier.animateContentSize())
                         }
                     }
-                    }
-                    if (surfaces.isNotEmpty()) {
-                        surfaces.forEach { surface ->
-                            A2uiSurface(
-                                surfaceModel = surface,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        Spacer(Modifier.padding(vertical = 15.dp))
-                    }
-                    if(homeState.aiResponseState.isModelDownloaded) {
-                        AIResponseCard(
-                            thinkingResponse = homeState.aiResponseState.thinkingResponse ?: "",
-                            aiResponse = homeState.aiResponseState.aiResponse ?: "",
-                            isGenerating = homeState.aiResponseState.isGenerating,
-                            showThinkingText = homeState.aiResponseState.showThinkingResponse,
-                            onToggleThinking = {
-                                component.onEvent(HomeEvent.OnToggleThinkingResponse)
-                            },
-                            isThinking = homeState.aiResponseState.isThinking
-                        )
-                    }
-
-                    WeatherCard(
-                        isLoading = homeState.weatherState.isLoading,
-                        error = homeState.weatherState.error,
-                        hasContent =  homeState.weatherState.currentWeather != null,
-                        location = homeState.weatherState.currentWeather?.location,
-                        currentTemperature = homeState.weatherState.currentWeather?.temp.toString(),
-                        currentWeatherIcon = homeState.weatherState.currentWeather?.icon,
-                        forecastData = homeState.weatherState.forecastWeather,
-                        isPermissionGranted = homeState.weatherState.isLocationPermissionGranted,
-                        weatherConditionText = homeState.weatherState.currentWeather?.condition.orEmpty(),
-                        weatherUnits = homeState.weatherState.weatherUnits,
-                        onLocationPermissionAccess = {
-                            component.onEvent(
-                                HomeEvent.RequestLocationPermission(
-                                    locationPermissionState.status.shouldShowRationale
-                                )
-                            )
-                        }
-                    )
-                    Spacer(Modifier.padding(vertical = 10.dp))
-                    CalendarCard(
-                        calenderState = homeState.calenderData,
-                        grantPermission = {
-                            component.onEvent(
-                                HomeEvent.RequestCalendarPermission(
-                                    calenderPermissionState.status.shouldShowRationale
-                                )
-                            )
-
-                        },
-
-                        )
-                    Spacer(Modifier.padding(vertical = 10.dp))
-
-                    TodoCard(
-                        todoState = homeState.todoState,
-                        onConnect = {
-                            component.onEvent(HomeEvent.ConnectTodoist)
-                        },
-                        onTodoOpen = { link ->
-                            component.onEvent(HomeEvent.OnOpenLink(link))
-                        }
-
-                    )
-
                 }
+
+                if (state.aiResponseState.isModelDownloaded) {
+                    AIResponseCard(
+                        thinkingResponse = state.aiResponseState.thinkingResponse ?: "",
+                        aiResponse = state.aiResponseState.aiResponse ?: "",
+                        isGenerating = state.aiResponseState.isGenerating,
+                        showThinkingText = state.aiResponseState.showThinkingResponse,
+                        onToggleThinking = {
+                            component.onEvent(HomeEvent.OnToggleThinkingResponse)
+                        },
+                        isThinking = state.aiResponseState.isThinking
+                    )
+                }
+
+                WeatherCard(
+                    isLoading = state.weatherState.isLoading,
+                    error = state.weatherState.error,
+                    hasContent = state.weatherState.currentWeather != null,
+                    location = state.weatherState.currentWeather?.location,
+                    currentTemperature = state.weatherState.currentWeather?.temp.toString(),
+                    currentWeatherIcon = state.weatherState.currentWeather?.icon,
+                    forecastData = state.weatherState.forecastWeather,
+                    isPermissionGranted = state.weatherState.isLocationPermissionGranted,
+                    weatherConditionText = state.weatherState.currentWeather?.condition.orEmpty(),
+                    weatherUnits = state.weatherState.weatherUnits,
+                    onLocationPermissionAccess = {
+                        component.onEvent(
+                            HomeEvent.RequestLocationPermission
+                        )
+                    },
+                    scrollToCurrentTimeIndex = state.weatherState.scrollToForecastCurrentTimeIndex
+                )
+                Spacer(Modifier.padding(vertical = 10.dp))
+                CalendarCard(
+                    calenderState = state.calenderData,
+                    grantPermission = {
+                        component.onEvent(
+                            HomeEvent.RequestCalendarPermission
+                        )
+                    },
+                )
+                Spacer(Modifier.padding(vertical = 10.dp))
+
+                TodoCard(
+                    todoState = state.todoState,
+                    onConnect = {
+                        component.onEvent(HomeEvent.ConnectTodoist)
+                    },
+                    onTodoOpen = { link ->
+                        component.onEvent(HomeEvent.OnOpenLink(link))
+                    }
+                )
             }
-
+        }
     }
-
 }
 
-
-
-
-
-
+private val dropdownItems = listOf(
+    DropDownItem("Settings", Icons.Rounded.Settings),
+    DropDownItem("Refresh", Icons.Rounded.Refresh),
+)

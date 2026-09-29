@@ -2,7 +2,6 @@ package com.charan.yourday
 
 import android.app.Application
 import android.util.Log
-import com.cactus.CactusContextInitializer
 import com.charan.yourday.di.androidModule
 import com.charan.yourday.di.initKoin
 import com.runanywhere.sdk.llm.llamacpp.LlamaCPP
@@ -22,7 +21,6 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         ApplicationHolder.applicationContext = this
-        CactusContextInitializer.initialize(this)
         initKoin {
             androidContext(this@MainApplication)
             modules(androidModule)
