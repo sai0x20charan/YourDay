@@ -7,13 +7,15 @@ import com.splendo.kaluga.permissions.location.registerLocationPermissionIfNotRe
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.KoinApplication
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.plugin.module.dsl.startKoin
 
-@Module(includes = [PlatformModule::class])
+@Module
+@Configuration("app")
 @ComponentScan("com.charan.yourday")
 class AppModule {
     @Single
@@ -29,9 +31,10 @@ class AppModule {
 }
 
 @Module
+@Configuration("app")
 expect class PlatformModule()
 
-@KoinApplication(modules = [AppModule::class])
-class YourDayApp
+@KoinApplication(modules = [AppModule::class, PlatformModule::class])
+class App
 
-fun initKoin(appDeclaration: KoinAppDeclaration? = null) = startKoin<YourDayApp>(appDeclaration)
+fun initKoin(appDeclaration: KoinAppDeclaration? = null) = startKoin<App>(appDeclaration)

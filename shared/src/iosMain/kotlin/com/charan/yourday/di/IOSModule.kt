@@ -14,36 +14,38 @@ import dev.icerock.moko.permissions.ios.PermissionsController
 import dev.icerock.moko.permissions.ios.PermissionsControllerProtocol
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
-import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.koin.plugin.module.dsl.startKoin
 
 @Module
+@Configuration("app")
 actual class PlatformModule {
     @Single
-    fun locationService(): LocationServiceRepo = LocationServiceImp()
+    fun provideLocationService(): LocationServiceRepo = LocationServiceImp()
 
     @Single
-    fun permissionsController(): PermissionsControllerProtocol = PermissionsController()
+    fun providePermissionsController(): PermissionsControllerProtocol = PermissionsController()
 
     @Single
-    fun httpClientEngine(): HttpClientEngine = Darwin.create()
+    fun provideHttpClientEngine(): HttpClientEngine = Darwin.create()
 
     @Single
-    fun permissionManager(): PermissionManager = PermissionManagerImp()
+    fun providePermissionManager(): PermissionManager = PermissionManagerImp()
 
     @Single
-    fun calenderEventsRepo(): CalenderEventsRepo = CalenderEventsImp()
+    fun provideCalenderEventsRepo(): CalenderEventsRepo = CalenderEventsImp()
 
     @Single
-    fun platformSettings(): PlatformSettings = PlatformSettings()
+    fun providePlatformSettings(): PlatformSettings = PlatformSettings()
 
     @Single
-    fun dataStore(): DataStore<Preferences> = createDataStore()
+    fun provideDataStore(): DataStore<Preferences> = createDataStore()
 }
 
 class KointInitHelper {
     fun initKoin() {
-        com.charan.yourday.di.initKoin()
+        startKoin<App> {}
     }
 }

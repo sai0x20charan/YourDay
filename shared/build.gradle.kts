@@ -12,6 +12,12 @@ plugins {
 //    alias(libs.plugins.mikepenz.aboutlibrary)
 }
 
+koinCompiler {
+    compileSafety = true
+    strictSafety = false
+    userLogs = true
+}
+
 kotlin {
 
     androidLibrary {

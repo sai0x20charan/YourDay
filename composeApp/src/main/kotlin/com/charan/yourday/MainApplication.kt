@@ -1,10 +1,11 @@
 package com.charan.yourday
 
 import android.app.Application
-import com.charan.yourday.di.initKoin
+import com.charan.yourday.di.App
 import com.splendo.kaluga.base.ApplicationHolder
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import org.koin.plugin.module.dsl.startKoin
 
 class MainApplication : Application() {
 
@@ -12,7 +13,7 @@ class MainApplication : Application() {
         super.onCreate()
         ApplicationHolder.applicationContext = this
 
-        initKoin {
+        startKoin<App> {
             androidContext(this@MainApplication)
             androidLogger()
         }

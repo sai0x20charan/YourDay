@@ -14,37 +14,39 @@ import com.charan.yourday.utils.PlatformSettings
 import dev.icerock.moko.permissions.PermissionsController
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
+import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 
 @Module
+@Configuration("app")
 actual class PlatformModule {
     @Single
-    fun permissionsController(context: Context): PermissionsController =
+    fun providePermissionsController(context: Context): PermissionsController =
         PermissionsController(applicationContext = context)
 
     @Factory
-    fun locationService(context: Context): LocationServiceRepo =
+    fun provideLocationService(context: Context): LocationServiceRepo =
         LocationServiceImp(context = context)
 
     @Single
-    fun httpClientEngine(): HttpClientEngine =
+    fun provideHttpClientEngine(): HttpClientEngine =
         OkHttp.create()
 
     @Factory
-    fun permissionManager(context: Context): PermissionManager =
+    fun providePermissionManager(context: Context): PermissionManager =
         PermissionManagerImp(context = context)
 
     @Single
-    fun calenderEventsRepo(context: Context): CalenderEventsRepo =
+    fun provideCalenderEventsRepo(context: Context): CalenderEventsRepo =
         CalenderEventsImp(context = context)
 
     @Single
-    fun platformSettings(context: Context): PlatformSettings =
+    fun providePlatformSettings(context: Context): PlatformSettings =
         PlatformSettings(context = context)
 
     @Single
-    fun dataStore(context: Context): DataStore<Preferences> =
+    fun provideDataStore(context: Context): DataStore<Preferences> =
         createDataStore(context)
 }
