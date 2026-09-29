@@ -1,25 +1,61 @@
 package com.charan.yourday.presentation.home.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.charan.yourday.MR
-import com.charan.yourday.*
+import com.charan.yourday.cloudy
 import com.charan.yourday.presentation.home.ForecastWeatherState
+import com.charan.yourday.presentation.home.WeatherState
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
+
+@Composable
+fun WeatherCard(
+    weatherState: WeatherState,
+    grantPermission: () -> Unit,
+    scrollToCurrentTimeIndex: Int
+) {
+    WeatherCard(
+        isLoading = weatherState.isLoading,
+        error = weatherState.error,
+        hasContent = weatherState.currentWeather != null,
+        location = weatherState.currentWeather?.location,
+        currentWeatherIcon = weatherState.currentWeather?.icon,
+        currentTemperature = weatherState.currentWeather?.temp?.toString(),
+        isPermissionGranted = weatherState.isLocationPermissionGranted,
+        weatherConditionText = weatherState.currentWeather?.condition.orEmpty(),
+        onLocationPermissionAccess = grantPermission,
+        weatherUnits = weatherState.weatherUnits,
+        forecastData = weatherState.forecastWeather,
+        scrollToCurrentTimeIndex = scrollToCurrentTimeIndex
+    )
+}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -48,31 +84,25 @@ fun WeatherCard(
     ContentElevatedCard(
         isLoading = isLoading,
         hasError = error,
+        hasContent = hasContent,
         content = {
             if (!isPermissionGranted) {
                 GrantPermissionContent(
-                    title = "Enable location to show weather"
+                    "Please Grant Permission to access weather information"
                 ) {
                     onLocationPermissionAccess()
                 }
-                return@ContentElevatedCard
-            }
-
-            if (hasContent) {
+            } else {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                    modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
+                        Column {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -142,7 +172,6 @@ private fun CompactForecastChip(
     item: ForecastWeatherState,
     weatherUnits: String,
 ) {
-
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f),
@@ -153,13 +182,11 @@ private fun CompactForecastChip(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-
             Text(
                 text = item.time.orEmpty(),
                 style = MaterialTheme.typography.labelSmallEmphasized,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
 
             Image(
                 painter = painterResource(item.icon ?: MR.images.cloudy),

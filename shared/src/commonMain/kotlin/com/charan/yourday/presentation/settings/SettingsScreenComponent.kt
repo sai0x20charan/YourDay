@@ -1,8 +1,8 @@
 package com.charan.yourday.presentation.settings
 
 import com.arkivanov.decompose.ComponentContext
-import com.charan.yourday.data.repository.TodoistRepo
-import com.charan.yourday.utils.UserPreferencesStore
+import com.charan.yourday.data.repository.TodoistRepository
+import com.charan.yourday.data.repository.UserPreferencesRepository
 import com.charan.yourday.utils.appVersion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.CoroutineScope
@@ -22,8 +22,8 @@ class SettingsScreenComponent (
 
 ) : KoinComponent, ComponentContext by componentContext{
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private val userPreferences : UserPreferencesStore = get()
-    private val todoistRepo: TodoistRepo = get()
+    private val userPreferencesRepository : UserPreferencesRepository = get()
+    private val todoistRepository: TodoistRepository = get()
 
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState = _settingsState.asStateFlow()
@@ -34,7 +34,7 @@ class SettingsScreenComponent (
     }
 
     private fun getSetTemperatureUnits() = coroutineScope.launch{
-        userPreferences.weatherUnits.collectLatest {
+        userPreferencesRepository.weatherUnits.collectLatest {
             updateSettingsState(
                 weatherUnits = it
             )
@@ -47,13 +47,13 @@ class SettingsScreenComponent (
         )
     }
     private fun setTemperature(weatherUnits : String) = coroutineScope.launch {
-       userPreferences.setWeatherUnits(weatherUnits)
+       userPreferencesRepository.setWeatherUnits(weatherUnits)
     }
     private fun deleteTodoistToken() = coroutineScope.launch {
-        userPreferences.deleteTodoistToken()
+        userPreferencesRepository.clearTodoistAccessToken()
     }
     private fun isTodoConnected() = coroutineScope.launch {
-        userPreferences.todoistAccessToken.collectLatest {
+        userPreferencesRepository.todoistAccessToken.collectLatest {
             if(it !=null){
                 updateSettingsState(
                     isTodoistConnected = true
@@ -76,7 +76,7 @@ class SettingsScreenComponent (
 
             SettingsEvents.TodoConnect -> {
                 if(_settingsState.value.isTodoistConnected==false){
-                    todoistRepo.requestAuthorization()
+                    todoistRepository.requestAuthorization()
                 } else{
                     deleteTodoistToken()
                 }

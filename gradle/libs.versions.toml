@@ -15,7 +15,6 @@ material = "1.12.1"
 material3 = "1.11.0-alpha07"
 materialIconsExtended = "1.7.3"
 multiplatformMarkdownRendererM3 = "0.45.0"
-permissions = "0.20.1"
 playServicesLocation = "21.4.0"
 resourcesGenerator = "0.27.1"
 graphics = "0.10.2"
@@ -90,8 +89,6 @@ resources = { module = "dev.icerock.moko:resources", version.ref = "resourcesGen
 resources-compose = { module = "dev.icerock.moko:resources-compose", version.ref = "resourcesGenerator" }
 graphics = { module = "dev.icerock.moko:graphics", version.ref = "graphics" }
 resources-generator = { module = "dev.icerock.moko:resources-generator", version.ref = "resourcesGenerator" }
-permissions = { module = "dev.icerock.moko:permissions", version.ref = "permissions" }
-permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "permissions" }
 
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }

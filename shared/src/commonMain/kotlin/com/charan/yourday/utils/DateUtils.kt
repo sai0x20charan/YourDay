@@ -1,10 +1,8 @@
 package com.charan.yourday.utils
 
-
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.format
@@ -31,6 +29,7 @@ object DateUtils {
         }
         return this.format(dateTimeFormat)
     }
+
     fun getDateInDDMMYYYY(): String {
         val formatPattern = "dd/MM/yyyy"
         val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -38,6 +37,10 @@ object DateUtils {
             byUnicodePattern(formatPattern)
         }
         return currentDate.format(dateTimeFormat)
+    }
+
+    fun getGreeting(): String {
+        return getCurrentDateTime().getGreeting()
     }
 
     fun LocalDateTime.getGreeting(): String {
@@ -50,7 +53,7 @@ object DateUtils {
         }
     }
 
-    fun getCurrentTimeInMillis() : Long {
+    fun getCurrentTimeInMillis(): Long {
         return Clock.System.now().toEpochMilliseconds()
     }
 
@@ -87,18 +90,17 @@ object DateUtils {
         )
 
         val month = monthNames[parsedDate.month.ordinal]
-        val day = parsedDate.dayOfMonth
+        val day = parsedDate.day
         val year = parsedDate.year
 
         return "$month $day, $year"
     }
+
     fun String.convertToMMMDYYYYWithTime(): String {
         val localDateTime: LocalDateTime = try {
-
             val instant = Instant.parse(this)
             instant.toLocalDateTime(TimeZone.currentSystemDefault())
         } catch (e: Exception) {
-
             LocalDateTime.parse(this)
         }
 
@@ -108,7 +110,7 @@ object DateUtils {
         )
 
         val month = monthNames[localDateTime.month.ordinal]
-        val day = localDateTime.dayOfMonth
+        val day = localDateTime.day
         val year = localDateTime.year
         val hour = localDateTime.hour
         val minute = localDateTime.minute
@@ -118,14 +120,14 @@ object DateUtils {
         return "$month $day, $year, $formattedHour:${minute.toString().padStart(2, '0')} $amPm"
     }
 
-    fun LocalDateTime.toMMMDYYYYWithTime() : String{
+    fun LocalDateTime.toMMMDYYYYWithTime(): String {
         val monthNames = listOf(
             "Jan", "Feb", "Mar", "Apr", "May", "Jun",
             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         )
 
         val month = monthNames[this.month.ordinal]
-        val day = this.dayOfMonth
+        val day = this.day
         val year = this.year
         val hour = this.hour
         val minute = this.minute
@@ -135,7 +137,7 @@ object DateUtils {
         return "$month $day, $year, $formattedHour:${minute.toString().padStart(2, '0')} $amPm"
     }
 
-    fun LocalDateTime.isOverDue() : Boolean {
+    fun LocalDateTime.isOverDue(): Boolean {
         val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         return this < currentTime
     }
@@ -145,7 +147,7 @@ object DateUtils {
         return instant.toLocalDateTime(timeZone)
     }
 
-    fun LocalDateTime.toTimeString() : String {
+    fun LocalDateTime.toTimeString(): String {
         val hour = this.hour % 12
         val adjustedHour = if (hour == 0) 12 else hour
         val amPm = if (this.hour < 12) "AM" else "PM"
@@ -153,7 +155,7 @@ object DateUtils {
         return "${adjustedHour.toString()} $amPm"
     }
 
-    fun LocalDateTime.toTimeInMillis() : Long {
+    fun LocalDateTime.toTimeInMillis(): Long {
         val timeZone = TimeZone.currentSystemDefault()
         return this.toInstant(timeZone).toEpochMilliseconds()
     }
@@ -175,11 +177,9 @@ object DateUtils {
         }
     }
 
-
     fun String.toLocalDate(): LocalDate {
         return Instant.parse(this)
             .toLocalDateTime(TimeZone.currentSystemDefault())
             .date
     }
-
 }

@@ -1,6 +1,5 @@
 package com.charan.yourday.utils
 
-import android.util.Log
 import com.charan.yourday.MR
 import com.charan.yourday.*
 import dev.icerock.moko.resources.ImageResource

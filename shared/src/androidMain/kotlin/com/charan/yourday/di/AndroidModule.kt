@@ -1,33 +1,29 @@
 package com.charan.yourday.di
 
-
-import android.app.Activity
-import com.charan.yourday.createDataStore
-import com.charan.yourday.data.repository.CalenderEventsRepo
-import com.charan.yourday.data.repository.LocationServiceRepo
-import com.charan.yourday.data.repository.impl.CalenderEventsImp
-import com.charan.yourday.data.repository.impl.LocationServiceImp
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.charan.yourday.data.datastore.createDataStore
+import com.charan.yourday.data.repository.CalendarEventsRepository
+import com.charan.yourday.data.repository.LocationServiceRepository
+import com.charan.yourday.data.repository.impl.CalendarEventsRepositoryImpl
+import com.charan.yourday.data.repository.impl.LocationServiceRepositoryImpl
 import com.charan.yourday.permission.PermissionManager
-import com.charan.yourday.permission.PermissionManagerImp
+import com.charan.yourday.permission.PermissionManagerImpl
 import com.charan.yourday.utils.PlatformSettings
-import dev.icerock.moko.permissions.PermissionsController
 import io.ktor.client.engine.okhttp.OkHttp
-import org.koin.android.ext.koin.androidApplication
-
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val androidModule = module {
-    single { PermissionsController(applicationContext = androidContext()) }
-    factory   <LocationServiceRepo>{ LocationServiceImp(context = androidContext())  }
+    factory<LocationServiceRepository> { LocationServiceRepositoryImpl(context = androidContext()) }
     single { OkHttp.create() }
     factory<PermissionManager> {
-        PermissionManagerImp(
+        PermissionManagerImpl(
             context = androidContext(),
         )
     }
-    single <CalenderEventsRepo> { CalenderEventsImp(context = androidContext())}
-    single <PlatformSettings>{ PlatformSettings(context = androidContext()) }
-    single { createDataStore(get()) }
-
+    single<CalendarEventsRepository> { CalendarEventsRepositoryImpl(context = androidContext()) }
+    single<PlatformSettings> { PlatformSettings(context = androidContext()) }
+    single<DataStore<Preferences>> { createDataStore(context = get<Context>()) }
 }

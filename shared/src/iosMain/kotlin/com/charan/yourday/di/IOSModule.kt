@@ -1,28 +1,26 @@
 package com.charan.yourday.di
 
-import com.charan.yourday.createDataStore
-import com.charan.yourday.data.repository.CalenderEventsRepo
-import com.charan.yourday.data.repository.LocationServiceRepo
-import com.charan.yourday.data.repository.impl.CalenderEventsImp
-import com.charan.yourday.data.repository.impl.LocationServiceImp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.charan.yourday.data.datastore.createDataStore
+import com.charan.yourday.data.repository.CalendarEventsRepository
+import com.charan.yourday.data.repository.LocationServiceRepository
+import com.charan.yourday.data.repository.impl.CalendarEventsRepositoryImpl
+import com.charan.yourday.data.repository.impl.LocationServiceRepositoryImpl
 import com.charan.yourday.permission.PermissionManager
-import com.charan.yourday.permission.PermissionManagerImp
-import dev.icerock.moko.permissions.ios.PermissionsController
-import dev.icerock.moko.permissions.ios.PermissionsControllerProtocol
+import com.charan.yourday.permission.PermissionManagerImpl
 import io.ktor.client.engine.darwin.Darwin
 import org.koin.dsl.module
 
-
 val iosModule = module {
-    single <LocationServiceRepo>{ LocationServiceImp() }
-    single <PermissionsControllerProtocol>{ PermissionsController() }
+    single<LocationServiceRepository> { LocationServiceRepositoryImpl() }
     single { Darwin.create() }
-    single <PermissionManager>{ PermissionManagerImp() }
-    single <CalenderEventsRepo>{ CalenderEventsImp() }
-    single { createDataStore() }
+    single<PermissionManager> { PermissionManagerImpl() }
+    single<CalendarEventsRepository> { CalendarEventsRepositoryImpl() }
+    single<DataStore<Preferences>> { createDataStore() }
 }
 
-class KointInitHelper(){
+class KointInitHelper() {
     fun initKoin() {
         initKoin {
             modules(iosModule)

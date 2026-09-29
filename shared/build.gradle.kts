@@ -57,8 +57,6 @@ kotlin {
             api(libs.resources)
             api(libs.kotlinx.datetime)
             api(libs.graphics)
-            api(libs.permissions)
-            api(libs.permissions.compose)
             api(libs.datastore.preferences)
             api(libs.datastore)
             api(libs.decompose)

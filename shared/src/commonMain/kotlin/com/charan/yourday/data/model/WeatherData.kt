@@ -1,8 +1,6 @@
 package com.charan.yourday.data.model
 
-import dev.icerock.moko.resources.ImageResource
 import kotlinx.datetime.LocalDateTime
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable

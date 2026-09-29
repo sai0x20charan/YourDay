@@ -1,14 +1,12 @@
 package com.charan.yourday.data.mapper
 
-import com.charan.yourday.MR
 import com.charan.yourday.data.model.TodoData
-import com.charan.yourday.data.network.responseDTO.TodoistTodayTasksResponseDTO
+import com.charan.yourday.data.network.dto.TodoistTodayTasksResponseDTO
 import com.charan.yourday.utils.DateUtils.isOverDue
 import com.charan.yourday.utils.DateUtils.toLocalDateTime
 import com.charan.yourday.utils.TodoProvidersEnums
 
-
-fun TodoistTodayTasksResponseDTO.toTodoData() : List<TodoData>{
+fun TodoistTodayTasksResponseDTO.toTodoData(): List<TodoData> {
     val todoList = mutableListOf<TodoData>()
     this.results.forEach {
         val dueDate = it.due?.date?.toLocalDateTime()
@@ -22,7 +20,6 @@ fun TodoistTodayTasksResponseDTO.toTodoData() : List<TodoData>{
                 isOverDue = dueDate?.isOverDue()
             )
         )
-
     }
     return todoList
 }

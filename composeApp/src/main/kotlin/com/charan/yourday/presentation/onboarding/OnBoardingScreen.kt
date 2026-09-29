@@ -1,19 +1,56 @@
 package com.charan.yourday.presentation.onboarding
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,32 +58,28 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.charan.yourday.MR
-import com.charan.yourday.*
-import com.charan.yourday.presentation.home.HomeEvent
-import com.charan.yourday.presentation.home.HomeScreenComponent
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.charan.yourday.Todoist
 import dev.icerock.moko.resources.compose.painterResource
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OnBoardingScreen(
-    component: HomeScreenComponent
+    component: OnBoardingScreenComponent
 ) {
-    val state by component.state.collectAsState()
+    val state by component.onBoardingState.collectAsState()
 
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { visible = true }
 
-    Scaffold (
+    Scaffold(
         modifier = Modifier.navigationBarsPadding(),
         bottomBar = {
             FilledTonalButton(
-                onClick = { component.onEvent(HomeEvent.OnBoardingFinish) },
+                onClick = { component.onEvent(OnBoardingEvent.Finish) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
-
                 shapes = ButtonDefaults.shapes(shape = MaterialTheme.shapes.extraLarge)
             ) {
                 Text(
@@ -61,8 +94,7 @@ fun OnBoardingScreen(
                 )
             }
         }
-
-    ){ padding ->
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -113,12 +145,12 @@ fun OnBoardingScreen(
                     icon = Icons.Default.WbSunny,
                     title = "Weather Insights",
                     description = "Real-time weather updates to plan your day",
-                    isGranted = state.weatherState.isLocationPermissionGranted,
+                    isGranted = state.isLocationPermissionGranted,
                     grantedText = "Location access granted",
                     buttonText = "Enable Location",
                     onAction = {
                         component.onEvent(
-                            HomeEvent.RequestLocationPermission
+                            OnBoardingEvent.RequestLocationPermission
                         )
                     }
                 )
@@ -131,12 +163,12 @@ fun OnBoardingScreen(
                     icon = Icons.Default.CalendarMonth,
                     title = "Calendar Sync",
                     description = "Never miss important events and meetings",
-                    isGranted = state.calenderData.isCalenderPermissionGranted,
+                    isGranted = state.isCalendarPermissionGranted,
                     grantedText = "Calendar access granted",
                     buttonText = "Grant Calendar Access",
                     onAction = {
                         component.onEvent(
-                            HomeEvent.RequestCalendarPermission
+                            OnBoardingEvent.RequestCalendarPermission
                         )
                     }
                 )
@@ -146,9 +178,9 @@ fun OnBoardingScreen(
                 AnimatedTodoCard(
                     visible = visible,
                     delay = 600,
-                    isTodoConnected = state.todoState.isTodoAuthenticated,
+                    isTodoConnected = state.isTodoistConnected,
                     onTodoistConnect = {
-                        component.onEvent(HomeEvent.ConnectTodoist)
+                        component.onEvent(OnBoardingEvent.ConnectTodoist)
                     }
                 )
 
@@ -158,7 +190,7 @@ fun OnBoardingScreen(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AnimatedFeatureCard(
     visible: Boolean,
