@@ -1,64 +1,40 @@
 package com.charan.yourday.di
 
 import com.charan.yourday.data.network.ktor.createHttpClient
-import com.charan.yourday.data.remote.todoist.api.TodoistApi
-import com.charan.yourday.data.remote.todoist.datasource.TodoistRemoteDataSource
-import com.charan.yourday.data.remote.weather.api.WeatherApi
-import com.charan.yourday.data.remote.weather.datasource.WeatherRemoteDataSource
-import com.charan.yourday.data.repository.TodoistRepository
-import com.charan.yourday.data.repository.UserPreferencesRepository
-import com.charan.yourday.data.repository.WeatherRepository
-import com.charan.yourday.data.repository.impl.TodoistRepositoryImpl
-import com.charan.yourday.data.repository.impl.UserPreferencesRepositoryImpl
-import com.charan.yourday.data.repository.impl.WeatherRepositoryImpl
 import com.splendo.kaluga.permissions.base.PermissionsBuilder
 import com.splendo.kaluga.permissions.calendar.registerCalendarPermissionIfNotRegistered
 import com.splendo.kaluga.permissions.location.registerLocationPermissionIfNotRegistered
-import org.koin.core.context.startKoin
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngine
+import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.Configuration
+import org.koin.core.annotation.KoinApplication
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.koin.dsl.KoinAppDeclaration
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.startKoin
 
-val appModule = module {
-    single { createHttpClient(get()) }
+@Module
+@Configuration("app")
+@ComponentScan("com.charan.yourday")
+class AppModule {
+    @Single
+    fun provideHttpClient(engine: HttpClientEngine): HttpClient =
+        createHttpClient(engine)
 
-    // Weather Remote Data Source
-    single { WeatherApi(client = get()) }
-    single { WeatherRemoteDataSource(weatherApi = get()) }
-
-    // Todoist Remote Data Source
-    single { TodoistApi(client = get()) }
-    single { TodoistRemoteDataSource(todoistApi = get()) }
-
-    // Repositories
-    single<UserPreferencesRepository> {
-        UserPreferencesRepositoryImpl(
-            dataStore = get()
-        )
-    }
-    single<WeatherRepository> {
-        WeatherRepositoryImpl(
-            weatherRemoteDataSource = get(),
-            dataStore = get()
-        )
-    }
-    single<TodoistRepository> {
-        TodoistRepositoryImpl(
-            todoistRemoteDataSource = get(),
-            userPreferencesRepository = get(),
-            dataStore = get()
-        )
-    }
-
-    single<PermissionsBuilder> {
-        PermissionsBuilder()
-            .apply {
-                this.registerLocationPermissionIfNotRegistered()
-                this.registerCalendarPermissionIfNotRegistered()
-            }
-    }
+    @Single
+    fun providePermissionsBuilder(): PermissionsBuilder =
+        PermissionsBuilder().apply {
+            registerLocationPermissionIfNotRegistered()
+            registerCalendarPermissionIfNotRegistered()
+        }
 }
 
-fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
-    appDeclaration()
-    modules(appModule)
-}
+@Module
+@Configuration("app")
+expect class PlatformModule()
+
+@KoinApplication(modules = [AppModule::class, PlatformModule::class])
+class App
+
+fun initKoin(appDeclaration: KoinAppDeclaration? = null) = startKoin<App>(appDeclaration)

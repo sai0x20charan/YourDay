@@ -3,7 +3,7 @@ import Firebase
 import Shared
 
 @main
-struct iOSApp: App {
+struct iOSApp: SwiftUI.App {
     
     @State private var componentHolder: ComponentHolder<RootComponent>
     @State private var authentizationId : String? = nil

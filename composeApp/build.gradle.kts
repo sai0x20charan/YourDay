@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
     alias(libs.plugins.mikepenz.aboutlibrary.android)
-
+    alias(libs.plugins.koin.compiler)
 }
 
 kotlin {
@@ -37,6 +37,7 @@ kotlin {
             implementation(platform(libs.koin.bom))
             implementation(libs.koin.android)
             implementation(libs.koin.core)
+            implementation(libs.koin.annotations)
             implementation(libs.koin.compose)
             implementation(libs.koin.androidx.compose)
 
@@ -98,7 +99,7 @@ android {
         create("release") {
             keyAlias = getLocalProperty("KEY_ALIAS")
             keyPassword = getLocalProperty("KEY_PASSWORD")
-            storeFile = file(getLocalProperty("KEY_LOCATION") ?: "")
+            storeFile = getLocalProperty("KEY_LOCATION")?.takeIf { it.isNotBlank() }?.let { file(it) }
             storePassword = getLocalProperty("KEY_STORE_PASSWORD")
         }
     }

@@ -6,7 +6,9 @@ import com.charan.yourday.data.remote.weather.api.WeatherApi
 import com.charan.yourday.utils.ErrorCodes
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
+import org.koin.core.annotation.Single
 
+@Single
 class WeatherRemoteDataSource(
     private val weatherApi: WeatherApi
 ) {

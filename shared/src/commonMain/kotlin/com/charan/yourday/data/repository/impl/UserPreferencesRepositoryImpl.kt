@@ -9,7 +9,9 @@ import com.charan.yourday.data.repository.UserPreferencesRepository
 import com.charan.yourday.utils.WeatherUnitsEnums
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.koin.core.annotation.Single
 
+@Single(binds = [UserPreferencesRepository::class])
 class UserPreferencesRepositoryImpl(
     private val dataStore: DataStore<Preferences>
 ) : UserPreferencesRepository {

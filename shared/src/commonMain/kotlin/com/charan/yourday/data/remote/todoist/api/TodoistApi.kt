@@ -10,7 +10,9 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Parameters
 import io.ktor.http.path
+import org.koin.core.annotation.Single
 
+@Single
 class TodoistApi(
     private val client: HttpClient
 ) {

@@ -21,7 +21,9 @@ graphics = "0.10.2"
 datetime = "0.8.0"
 ktor-client = "3.6.0"
 buildKonfig = "0.23.0"
-koin = "4.2.2"
+koin = "4.2.1"
+koinComposeMultiplatform = "4.2.1"
+koinPlugin = "1.2.1"
 navigationCompose = "2.10.2"
 kotlinxSerializationJson = "1.11.0"
 datastore = "1.2.1"
@@ -49,6 +51,8 @@ koin-android = { module = "io.insert-koin:koin-android" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose" }
 koin-core = { module = "io.insert-koin:koin-core" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinComposeMultiplatform" }
 
 # Ktor BOM & modules
 ktor-bom = { group = "io.ktor", name = "ktor-bom", version.ref = "ktor-client" }
@@ -74,6 +78,7 @@ foundation = { module = "org.jetbrains.compose.foundation:foundation", version.r
 material = { module = "org.jetbrains.compose.material:material", version.ref = "material" }
 material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+
 runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "runtime" }
 ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "uiToolingPreview" }
 ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "uiToolingPreview" }
@@ -118,6 +123,7 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 multiplatformResources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "resourcesGenerator" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
+koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koinPlugin" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 mikepenz-aboutlibrary = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibrariesCore" }
 mikepenz-aboutlibrary-android = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibrariesCore" }

@@ -16,7 +16,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.core.annotation.Single
 
+@Single(binds = [TodoistRepository::class])
 class TodoistRepositoryImpl(
     private val todoistRemoteDataSource: TodoistRemoteDataSource,
     private val userPreferencesRepository: UserPreferencesRepository,

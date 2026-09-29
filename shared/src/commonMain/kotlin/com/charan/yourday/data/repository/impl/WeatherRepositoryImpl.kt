@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.core.annotation.Single
 
+@Single(binds = [WeatherRepository::class])
 class WeatherRepositoryImpl(
     private val weatherRemoteDataSource: WeatherRemoteDataSource,
     private val dataStore: DataStore<Preferences>

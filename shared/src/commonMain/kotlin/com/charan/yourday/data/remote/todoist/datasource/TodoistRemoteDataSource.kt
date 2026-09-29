@@ -6,7 +6,9 @@ import com.charan.yourday.data.remote.todoist.api.TodoistApi
 import com.charan.yourday.utils.ErrorCodes
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
+import org.koin.core.annotation.Single
 
+@Single
 class TodoistRemoteDataSource(
     private val todoistApi: TodoistApi
 ) {

@@ -9,21 +9,38 @@ import com.charan.yourday.data.repository.impl.CalendarEventsRepositoryImpl
 import com.charan.yourday.data.repository.impl.LocationServiceRepositoryImpl
 import com.charan.yourday.permission.PermissionManager
 import com.charan.yourday.permission.PermissionManagerImpl
+import com.charan.yourday.utils.PlatformSettings
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
-import org.koin.dsl.module
+import org.koin.core.annotation.Configuration
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
+import org.koin.plugin.module.dsl.startKoin
 
-val iosModule = module {
-    single<LocationServiceRepository> { LocationServiceRepositoryImpl() }
-    single { Darwin.create() }
-    single<PermissionManager> { PermissionManagerImpl() }
-    single<CalendarEventsRepository> { CalendarEventsRepositoryImpl() }
-    single<DataStore<Preferences>> { createDataStore() }
+@Module
+@Configuration("app")
+actual class PlatformModule {
+    @Single
+    fun provideLocationService(): LocationServiceRepository = LocationServiceRepositoryImpl()
+
+    @Single
+    fun provideHttpClientEngine(): HttpClientEngine = Darwin.create()
+
+    @Single
+    fun providePermissionManager(): PermissionManager = PermissionManagerImpl()
+
+    @Single
+    fun provideCalendarEventsRepo(): CalendarEventsRepository = CalendarEventsRepositoryImpl()
+
+    @Single
+    fun providePlatformSettings(): PlatformSettings = PlatformSettings()
+
+    @Single
+    fun provideDataStore(): DataStore<Preferences> = createDataStore()
 }
 
-class KointInitHelper() {
+class KointInitHelper {
     fun initKoin() {
-        initKoin {
-            modules(iosModule)
-        }
+        startKoin<App> {}
     }
 }
