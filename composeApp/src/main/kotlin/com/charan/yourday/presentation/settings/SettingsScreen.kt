@@ -122,7 +122,7 @@ fun SettingsScreen(
             item {
                 SectionHeader(title = "AI Model")
                 SettingItem(
-                    label = "Qwen3.5 2B Q4_K_M",
+                    label = state.selectedModelName,
                     trailingContent = {
                         if (state.aiModelState.isModelDownloaded) {
                             IconButton(

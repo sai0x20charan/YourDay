@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.charan.yourday.data.model.AIModels
 import com.charan.yourday.data.repository.UserPreferencesRepository
 import com.charan.yourday.utils.WeatherUnitsEnums
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +21,7 @@ class UserPreferencesRepositoryImpl(
         private val WEATHER_UNITS_KEY = stringPreferencesKey("weather_units")
         private val TODOIST_ACCESS_TOKEN_KEY = stringPreferencesKey("todoist_access_token")
         private val SHOULD_SHOW_ONBOARDING_KEY = booleanPreferencesKey("should_show_onboarding")
+        private val SELECTED_AI_MODEL_ID_KEY = stringPreferencesKey("selected_ai_model_id")
     }
 
     override val weatherUnits: Flow<String>
@@ -42,6 +44,11 @@ class UserPreferencesRepositoryImpl(
     override val shouldShowOnboarding: Flow<Boolean>
         get() = dataStore.data.map { preferences ->
             preferences[SHOULD_SHOW_ONBOARDING_KEY] ?: true
+        }
+
+    override val selectedAIModelId: Flow<String>
+        get() = dataStore.data.map { preferences ->
+            preferences[SELECTED_AI_MODEL_ID_KEY] ?: AIModels.DEFAULT_MODEL_ID
         }
 
     override suspend fun setWeatherUnits(weatherUnits: String) {
@@ -71,6 +78,12 @@ class UserPreferencesRepositoryImpl(
     override suspend fun setShouldShowOnboarding(shouldShow: Boolean) {
         dataStore.edit { preferences ->
             preferences[SHOULD_SHOW_ONBOARDING_KEY] = shouldShow
+        }
+    }
+
+    override suspend fun setSelectedAIModelId(modelId: String) {
+        dataStore.edit { preferences ->
+            preferences[SELECTED_AI_MODEL_ID_KEY] = modelId
         }
     }
 }

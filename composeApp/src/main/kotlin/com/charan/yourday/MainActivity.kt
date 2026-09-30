@@ -5,15 +5,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.LaunchedEffect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.defaultComponentContext
 import com.arkivanov.decompose.handleDeepLink
-import com.charan.yourday.data.repository.LocalLLMRepository
 import com.charan.yourday.root.RootComponent
-import org.koin.android.ext.android.get
 
 class MainActivity : ComponentActivity() {
 
@@ -35,11 +32,7 @@ class MainActivity : ComponentActivity() {
                     errorCode = error
                 )
             } ?: return
-        val localLLMRepository: LocalLLMRepository = get()
         setContent {
-            LaunchedEffect(Unit) {
-                localLLMRepository.initModel()
-            }
             App(root)
         }
     }

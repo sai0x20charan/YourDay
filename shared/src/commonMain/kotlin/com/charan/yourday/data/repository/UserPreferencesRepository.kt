@@ -8,10 +8,12 @@ interface UserPreferencesRepository {
     val weatherUnitEnum: Flow<WeatherUnitsEnums>
     val todoistAccessToken: Flow<String?>
     val shouldShowOnboarding: Flow<Boolean>
+    val selectedAIModelId: Flow<String>
 
     suspend fun setWeatherUnits(weatherUnits: String)
     suspend fun setWeatherUnit(weatherUnit: WeatherUnitsEnums)
     suspend fun setTodoistAccessToken(token: String)
     suspend fun clearTodoistAccessToken()
     suspend fun setShouldShowOnboarding(shouldShow: Boolean)
+    suspend fun setSelectedAIModelId(modelId: String)
 }

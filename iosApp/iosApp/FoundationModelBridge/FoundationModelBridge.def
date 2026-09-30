@@ -1,0 +1,13 @@
+//
+//  FoundationModelBridge.def
+//  iosApp
+//
+//  Created by Sai Charan on 9/30/26.
+//  Copyright © 2026 orgName. All rights reserved.
+//
+
+language = Objective-C
+headers = FoundationModelBridge.h
+
+compilerOpts = -framework Foundation -framework FoundationModels
+linkerOpts = -framework Foundation -framework FoundationModels

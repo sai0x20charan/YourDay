@@ -4,15 +4,14 @@ import com.arkivanov.decompose.ComponentContext
 import com.charan.yourday.data.repository.LocalLLMRepository
 import com.charan.yourday.data.repository.TodoistRepository
 import com.charan.yourday.data.repository.UserPreferencesRepository
-import com.charan.yourday.utils.ProcessState
 import com.charan.yourday.utils.appVersion
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -34,7 +33,7 @@ class SettingsScreenComponent(
         getSetTemperatureUnits()
         isTodoConnected()
         getAppVersion()
-        isAIModelDownloaded()
+        observeSelectedModel()
     }
 
     private fun getSetTemperatureUnits() = coroutineScope.launch {
@@ -73,20 +72,37 @@ class SettingsScreenComponent(
         }
     }
 
+    private fun observeSelectedModel() = coroutineScope.launch {
+        localLLMRepository.selectedModel.collectLatest { selectedModel ->
+            val isDownloaded = runCatching {
+                localLLMRepository.isModelDownloaded()
+            }.getOrDefault(false)
+            _settingsState.update {
+                it.copy(
+                    selectedModelName = selectedModel.name,
+                    aiModelState = it.aiModelState.copy(
+                        isModelDownloaded = isDownloaded
+                    )
+                )
+            }
+        }
+    }
+
     private fun downloadAIModel() = coroutineScope.launch {
-        localLLMRepository.downloadModel().collectLatest { processState ->
-            when (processState) {
-                is ProcessState.Loading -> {
+        localLLMRepository.downloadModel().collectLatest { status ->
+            when {
+                status.isFailed -> {
                     _settingsState.update {
                         it.copy(
                             aiModelState = it.aiModelState.copy(
-                                isModelDownloading = true,
-                                downloadProgress = processState.progress
+                                isModelDownloading = false,
+                                downloadProgress = null
                             )
                         )
                     }
                 }
-                is ProcessState.Success -> {
+
+                status.isDownloaded -> {
                     _settingsState.update {
                         it.copy(
                             aiModelState = it.aiModelState.copy(
@@ -98,36 +114,31 @@ class SettingsScreenComponent(
                     }
                 }
 
-                is ProcessState.Error -> {
+                else -> {
                     _settingsState.update {
                         it.copy(
                             aiModelState = it.aiModelState.copy(
-                                isModelDownloading = false
+                                isModelDownloading = true,
+                                downloadProgress = status.progress
                             )
                         )
                     }
                 }
-
-                else -> {}
             }
         }
     }
 
     private fun deleteAIModel() = coroutineScope.launch {
-        localLLMRepository.deleteModel().collectLatest { processState ->
-            when (processState) {
-                is ProcessState.Success -> {
-                    _settingsState.update {
-                        it.copy(
-                            aiModelState = it.aiModelState.copy(
-                                isModelDownloaded = false
-                            )
+        localLLMRepository.deleteModel()
+            .onSuccess {
+                _settingsState.update {
+                    it.copy(
+                        aiModelState = it.aiModelState.copy(
+                            isModelDownloaded = false
                         )
-                    }
+                    )
                 }
-                else -> {}
             }
-        }
     }
 
     fun onEvent(event: SettingsEvents) = coroutineScope.launch {
@@ -172,17 +183,6 @@ class SettingsScreenComponent(
                 weatherUnits = weatherUnits ?: it.weatherUnits,
                 isTodoistConnected = isTodoistConnected ?: it.isTodoistConnected,
                 appVersion = appVersion ?: it.appVersion
-            )
-        }
-    }
-
-    private fun isAIModelDownloaded() = coroutineScope.launch {
-        val isDownloaded = localLLMRepository.isModelDownloaded()
-        _settingsState.update {
-            it.copy(
-                aiModelState = it.aiModelState.copy(
-                    isModelDownloaded = isDownloaded
-                )
             )
         }
     }

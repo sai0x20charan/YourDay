@@ -36,6 +36,22 @@ struct HomeScreenView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
                     
+//                    if let aiState = homeState?.aiResponseState {
+//                        AIResponseCard(
+//                            thinkingResponse: aiState.thinkingResponse ?? "",
+//                            aiResponse: aiState.aiResponse ?? "",
+//                            isThinking : aiState.isThinking,
+//                            showThinking: aiState.showThinkingResponse,
+//                            onExpandToggle: {
+//                                component.onEvent(event: HomeEventOnToggleThinkingResponse.shared)
+//                            }
+//                            
+//                        )
+//                    }
+                    
+                    
+                    
+                    
                     WeatherCard(
                         weatherState: Binding(
                             get: { homeState?.weatherState },

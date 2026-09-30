@@ -3,11 +3,11 @@ package com.charan.yourday.di
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.charan.yourday.data.datastore.createDataStore
+import com.charan.yourday.data.local.llm.datasource.IosLocalLlmDataSource
+import com.charan.yourday.data.local.llm.datasource.LocalLlmDataSource
 import com.charan.yourday.data.repository.CalendarEventsRepository
-import com.charan.yourday.data.repository.LocalLLMRepository
 import com.charan.yourday.data.repository.LocationServiceRepository
 import com.charan.yourday.data.repository.impl.CalendarEventsRepositoryImpl
-import com.charan.yourday.data.repository.impl.LocalLLMRepositoryImpl
 import com.charan.yourday.data.repository.impl.LocationServiceRepositoryImpl
 import com.charan.yourday.permission.PermissionManager
 import com.charan.yourday.permission.PermissionManagerImpl
@@ -41,7 +41,7 @@ actual class PlatformModule {
     fun provideDataStore(): DataStore<Preferences> = createDataStore()
 
     @Single
-    fun provideLocalLLMRepository(): LocalLLMRepository = LocalLLMRepositoryImpl()
+    fun provideLocalLlmDataSource(): LocalLlmDataSource = IosLocalLlmDataSource()
 }
 
 class KointInitHelper {

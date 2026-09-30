@@ -2,6 +2,7 @@ package com.charan.yourday.presentation.home
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.subscribe
+import com.charan.yourday.data.model.LlmGenerationEvent
 import com.charan.yourday.data.model.WeatherData
 import com.charan.yourday.data.repository.CalendarEventsRepository
 import com.charan.yourday.data.repository.LocalLLMRepository
@@ -19,7 +20,6 @@ import com.charan.yourday.utils.DateUtils.getGreeting
 import com.charan.yourday.utils.DateUtils.toDDMMYYYY
 import com.charan.yourday.utils.ErrorCodes
 import com.charan.yourday.utils.OpenURL
-import com.charan.yourday.utils.ProcessState
 import com.splendo.kaluga.permissions.base.PermissionState
 import com.splendo.kaluga.permissions.base.Permissions
 import com.splendo.kaluga.permissions.base.PermissionsBuilder
@@ -80,6 +80,7 @@ class HomeScreenComponent(
         observeCalendarPermission()
         observeWeatherData()
         observeTodoData()
+        observeCachedSummary()
         coroutineScope.launch {
             authorizationId?.let { handleAuthorizationCode(it) }
             errorCode?.let { sendEffect(HomeEffect.ShowToast("Unable to authenticate")) }
@@ -88,7 +89,7 @@ class HomeScreenComponent(
         lifecycle.subscribe(
             onResume = {
                 if (_state.value.aiResponseState.isModelDownloaded) {
-                    generateSummary()
+                    //generateSummary()
                 }
             }
         )
@@ -110,7 +111,7 @@ class HomeScreenComponent(
             HomeEvent.FetchTodo -> refreshTodoTasks()
             HomeEvent.RefreshData -> refreshData()
             is HomeEvent.ShowDropdownMenu -> updateDropdownMenuState(event.show)
-            HomeEvent.OnGenerateAIResponse -> generateSummary()
+            HomeEvent.OnGenerateAIResponse -> generateSummary(forceRefresh = true)
             HomeEvent.OnToggleThinkingResponse -> {
                 _state.update {
                     it.copy(
@@ -371,7 +372,7 @@ class HomeScreenComponent(
         _effects.emit(effect)
     }
 
-    private fun generateSummary() = coroutineScope.launch {
+    private fun generateSummary(forceRefresh: Boolean = false) = coroutineScope.launch {
         if (localLLMRepo.isModelDownloaded()) {
             combine(
                 state.map { it.weatherState },
@@ -386,52 +387,47 @@ class HomeScreenComponent(
                 .filter { it }
                 .first()
 
-            localLLMRepo.generateDaySummary(input = _state.value.generateSummaryPrompt())
-                .collect { processState ->
-                    when (processState) {
-                        is ProcessState.Error -> {
-                            sendEffect(HomeEffect.ShowToast("Failed to generate summary: ${processState.message}"))
+            localLLMRepo.generateDaySummary(
+                input = _state.value.generateSummaryPrompt(),
+                forceRefresh = forceRefresh
+            )
+                .collect { event ->
+                    when (event) {
+                        is LlmGenerationEvent.Failed -> {
+                            updateAiResponseState {
+                                it.copy(
+                                    isGenerating = false,
+                                    isModelDownloaded = true,
+                                    error = event.message
+                                )
+                            }
+                            sendEffect(HomeEffect.ShowToast("Failed to generate summary: ${event.message}"))
                         }
 
-                        is ProcessState.Loading -> {
-                            _state.update {
+                        is LlmGenerationEvent.Completed -> {
+                            updateAiResponseState {
                                 it.copy(
-                                    aiResponseState = it.aiResponseState.copy(
-                                        isGenerating = true,
-                                        error = null,
-                                        isModelDownloaded = true
-                                    )
+                                    isGenerating = false,
+                                    isModelDownloaded = true,
+                                    error = null,
+                                    aiResponse = event.response.aiResponse,
+                                    thinkingResponse = event.response.thinkingResponse,
+                                    modelName = event.response.modelName,
+                                    isThinking = event.response.isThinking
                                 )
                             }
                         }
 
-                        ProcessState.NotDetermined -> {}
-                        is ProcessState.Success -> {
-                            _state.update {
+                        is LlmGenerationEvent.Streaming -> {
+                            updateAiResponseState {
                                 it.copy(
-                                    aiResponseState = it.aiResponseState.copy(
-                                        isGenerating = false,
-                                        error = null,
-                                        aiResponse = processState.data.aiResponse,
-                                        thinkingResponse = processState.data.thinkingResponse,
-                                        modelName = processState.data.modelName,
-                                        isThinking = processState.data.isThinking
-                                    )
-                                )
-                            }
-                        }
-
-                        is ProcessState.Streaming -> {
-                            _state.update {
-                                it.copy(
-                                    aiResponseState = it.aiResponseState.copy(
-                                        isGenerating = true,
-                                        error = null,
-                                        aiResponse = processState.partialData.aiResponse,
-                                        thinkingResponse = processState.partialData.thinkingResponse,
-                                        modelName = processState.partialData.modelName,
-                                        isThinking = processState.partialData.isThinking
-                                    )
+                                    isGenerating = true,
+                                    isModelDownloaded = true,
+                                    error = null,
+                                    aiResponse = event.response.aiResponse,
+                                    thinkingResponse = event.response.thinkingResponse,
+                                    modelName = event.response.modelName,
+                                    isThinking = event.response.isThinking
                                 )
                             }
                         }
@@ -447,5 +443,35 @@ class HomeScreenComponent(
                 )
             }
         }
+    }
+
+    private fun observeCachedSummary() = coroutineScope.launch {
+        runCatching { localLLMRepo.isModelDownloaded() }
+            .onSuccess { isDownloaded ->
+                _state.update {
+                    it.copy(
+                        aiResponseState = it.aiResponseState.copy(
+                            isModelDownloaded = isDownloaded
+                        )
+                    )
+                }
+            }
+        localLLMRepo.cachedSummary.collectLatest { cached ->
+            if (cached == null) return@collectLatest
+            updateAiResponseState { current ->
+                if (current.isGenerating) return@updateAiResponseState current
+                current.copy(
+                    isModelDownloaded = true,
+                    aiResponse = cached.aiResponse,
+                    thinkingResponse = cached.thinkingResponse,
+                    modelName = cached.modelName,
+                    isThinking = cached.isThinking
+                )
+            }
+        }
+    }
+
+    private inline fun updateAiResponseState(transform: (AIResponseState) -> AIResponseState) {
+        _state.update { it.copy(aiResponseState = transform(it.aiResponseState)) }
     }
 }

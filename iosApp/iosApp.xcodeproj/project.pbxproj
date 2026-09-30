@@ -34,6 +34,7 @@
 		0A6FB7672D4769C200A1C521 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
 		0A6FB7782D48E6A500A1C521 /* Utils */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Utils; sourceTree = "<group>"; };
 		0A6FB77B2D48E77900A1C521 /* Extensions */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Extensions; sourceTree = "<group>"; };
+		0AD3FD75306DBB6F0053CE07 /* FoundationModelBridge */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = FoundationModelBridge; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +87,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				0AD3FD75306DBB6F0053CE07 /* FoundationModelBridge */,
 				0A77332E2E467B4200EDEB06 /* GoogleService-Info.plist */,
 				0A6FB77B2D48E77900A1C521 /* Extensions */,
 				0A6FB7782D48E6A500A1C521 /* Utils */,
@@ -128,6 +130,7 @@
 				0A6FB7672D4769C200A1C521 /* Views */,
 				0A6FB7782D48E6A500A1C521 /* Utils */,
 				0A6FB77B2D48E77900A1C521 /* Extensions */,
+				0AD3FD75306DBB6F0053CE07 /* FoundationModelBridge */,
 			);
 			name = iosApp;
 			packageProductDependencies = (

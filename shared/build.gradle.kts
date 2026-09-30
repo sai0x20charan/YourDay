@@ -40,6 +40,15 @@ kotlin {
             export(libs.graphics)
             export(libs.decompose)
             export(libs.essenty.lifecycle)
+            linkerOpts("-undefined", "dynamic_lookup")
+        }
+
+        iosTarget.compilations.getByName("main"){
+            cinterops.create("FoundationModelBridge"){
+                definitionFile.set(file(rootDir.absolutePath + "/iosApp/iosApp/FoundationModelBridge/FoundationModelBridge.def"))
+                includeDirs.allHeaders(rootDir.absolutePath + "/iosApp/iosApp/FoundationModelBridge")
+
+            }
         }
     }
     
