@@ -4,72 +4,68 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
-
+    alias(libs.plugins.mikepenz.aboutlibrary.android)
+    alias(libs.plugins.koin.compiler)
 }
 
 kotlin {
-    androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
     
     sourceSets {
-        
-        androidMain.dependencies {
-            implementation(compose.preview)
+
+        dependencies {
             implementation(libs.androidx.activity.compose)
-
-
-        }
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material)
-            implementation(libs.androidx.material)
-//            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.runtime)
+            implementation(libs.foundation)
+            implementation(libs.material)
+            implementation(libs.material.icons.extended)
+            implementation(libs.ui)
+            implementation(libs.components.resources)
+            implementation(libs.ui.tooling.preview)
             implementation(projects.shared)
             api(libs.resources.compose)
+
+            // Firebase BOM
+            implementation(platform(libs.firebase.bom))
+            implementation(libs.firebase.crashlytics)
+
+            // Koin BOM
+            implementation(platform(libs.koin.bom))
             implementation(libs.koin.android)
             implementation(libs.koin.core)
+            implementation(libs.koin.annotations)
             implementation(libs.koin.compose)
             implementation(libs.koin.androidx.compose)
-            implementation (libs.accompanist.permissions)
+
+            implementation(libs.accompanist.permissions)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.multiplatform.markdown.renderer.m3)
             implementation(libs.richeditor.compose)
             implementation(libs.decompose)
             implementation(libs.decompose.jetbrains)
-            implementation(libs.decompose.jetbrains.experiment)
             implementation(libs.androidx.core.splashscreen)
-            implementation (libs.aboutlibraries.core)
+            implementation(libs.material3)
+            debugImplementation(libs.ui.tooling)
+            implementation(libs.aboutlibraries.core)
             implementation(libs.aboutlibraries.compose.m3)
-            implementation (libs.androidx.graphics.shapes)
-            implementation("org.jetbrains.compose.material3:material3:1.9.0-alpha04")
-
-
         }
     }
 }
 
+
 android {
     namespace = "com.charan.yourday"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk {
+        version = release(libs.versions.android.compileSdk.get().toInt()){
+            minorApiLevel = 0
+        }
+    }
+
 
     defaultConfig {
         applicationId = "com.charan.yourday"
@@ -88,19 +84,22 @@ android {
             isMinifyEnabled = false
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         buildConfig = true
+        resValues = true
+        compose = true
     }
 
     signingConfigs {
         create("release") {
             keyAlias = getLocalProperty("KEY_ALIAS")
             keyPassword = getLocalProperty("KEY_PASSWORD")
-            storeFile = file(getLocalProperty("KEY_LOCATION") ?: "")
+            storeFile = getLocalProperty("KEY_LOCATION")?.takeIf { it.isNotBlank() }?.let { file(it) }
             storePassword = getLocalProperty("KEY_STORE_PASSWORD")
         }
     }
@@ -109,7 +108,7 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            resValue("string","app_name","YourDay-Debug")
+            resValue("string", "app_name", "YourDay-Debug")
 
         }
 
@@ -122,21 +121,17 @@ android {
                 "proguard-rules.pro"
             )
         }
-        applicationVariants.all {
-            val variant = this
-            variant.outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
-                .forEach { output ->
-                    val outputFileName = "YourDay-${variant.buildType.name}-${variant.versionName}.apk"
-                    output.outputFileName = outputFileName
+
+        androidComponents {
+            onVariants { variant ->
+                variant.outputs.forEach { output ->
+                    if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
+                        val name = variant.name
+                        val versionName = android.defaultConfig.versionName ?: "1.0"
+                        output.outputFileName.set("YourDay-$name-$versionName.apk")
+                    }
                 }
+            }
         }
     }
 }
-
-dependencies {
-    implementation(libs.firebase.crashlytics)
-    debugImplementation(compose.uiTooling)
-
-
-}
-

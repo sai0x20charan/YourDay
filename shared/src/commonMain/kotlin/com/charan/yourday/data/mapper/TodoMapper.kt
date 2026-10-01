@@ -1,30 +1,25 @@
 package com.charan.yourday.data.mapper
 
-import com.charan.yourday.MR
 import com.charan.yourday.data.model.TodoData
-import com.charan.yourday.data.network.responseDTO.TodoistTodayTasksDTO
+import com.charan.yourday.data.network.dto.TodoistTodayTasksResponseDTO
 import com.charan.yourday.utils.DateUtils.isOverDue
-import com.charan.yourday.utils.TodoProviders
+import com.charan.yourday.utils.DateUtils.toLocalDateTime
+import com.charan.yourday.utils.TodoProvidersEnums
 
-
-fun List<TodoistTodayTasksDTO>.toTodoData() : List<TodoData>{
+fun TodoistTodayTasksResponseDTO.toTodoData(): List<TodoData> {
     val todoList = mutableListOf<TodoData>()
-    this.forEach {
+    this.results.forEach {
+        val dueDate = it.due?.date?.toLocalDateTime()
         todoList.add(
             TodoData(
                 id = it.id,
                 tasks = it.content,
-                todoProvider = TodoProviders.TODOIST,
-                todoProviderLogo = MR.images.Todoist,
-                dueDate = it.due.date,
-                dueTime = it.due.datetime,
-                taskLink = it.url,
-                isOverDue = it.due.date.isOverDue()
-
-
+                todoProvider = TodoProvidersEnums.TODOIST.name,
+                date = dueDate,
+                taskLink = "todoist://task?id=${it.id}",
+                isOverDue = dueDate?.isOverDue()
             )
         )
-
     }
     return todoList
 }

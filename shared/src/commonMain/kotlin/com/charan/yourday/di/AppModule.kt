@@ -1,26 +1,40 @@
 package com.charan.yourday.di
 
-import com.charan.yourday.data.network.Ktor.ApiService
-import com.charan.yourday.data.network.Ktor.createHttpClient
-import com.charan.yourday.data.repository.TodoistRepo
-import com.charan.yourday.data.repository.WeatherRepo
-import com.charan.yourday.data.repository.impl.TodoistImp
-import com.charan.yourday.data.repository.impl.WeatherRepoImp
-import com.charan.yourday.utils.UserPreferencesStore
-import org.koin.core.context.startKoin
-import org.koin.core.module.dsl.viewModel
+import com.charan.yourday.data.network.ktor.createHttpClient
+import com.splendo.kaluga.permissions.base.PermissionsBuilder
+import com.splendo.kaluga.permissions.calendar.registerCalendarPermissionIfNotRegistered
+import com.splendo.kaluga.permissions.location.registerLocationPermissionIfNotRegistered
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngine
+import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.Configuration
+import org.koin.core.annotation.KoinApplication
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.koin.dsl.KoinAppDeclaration
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.startKoin
 
-    val appModule = module {
-        single { createHttpClient(get()) }
-        factory  { ApiService(client = get()) }
-        factory  <WeatherRepo> { WeatherRepoImp(apiService = get()) }
-        factory <TodoistRepo>{ TodoistImp(get())  }
-        single <UserPreferencesStore>{ UserPreferencesStore() }
-    }
+@Module
+@Configuration("app")
+@ComponentScan("com.charan.yourday")
+class AppModule {
+    @Single
+    fun provideHttpClient(engine: HttpClientEngine): HttpClient =
+        createHttpClient(engine)
 
-    fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
-        appDeclaration()
-        modules(appModule)
-    }
+    @Single
+    fun providePermissionsBuilder(): PermissionsBuilder =
+        PermissionsBuilder().apply {
+            registerLocationPermissionIfNotRegistered()
+            registerCalendarPermissionIfNotRegistered()
+        }
+}
+
+@Module
+@Configuration("app")
+expect class PlatformModule()
+
+@KoinApplication(modules = [AppModule::class, PlatformModule::class])
+class App
+
+fun initKoin(appDeclaration: KoinAppDeclaration? = null) = startKoin<App>(appDeclaration)

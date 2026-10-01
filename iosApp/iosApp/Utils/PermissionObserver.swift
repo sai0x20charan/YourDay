@@ -11,8 +11,10 @@ import CoreLocation
 import EventKit
 import Shared
 import UIKit
+import PermissionsKit
+import CalendarPermission
 
-class PermissionObserver: NSObject, ObservableObject, CLLocationManagerDelegate{
+class PermissionObserver: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var locationManager = CLLocationManager()
     private var eventKit = EKEventStore()
     
@@ -39,14 +41,13 @@ class PermissionObserver: NSObject, ObservableObject, CLLocationManagerDelegate{
     func checkLocationPermission() {
         switch locationManager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            
             locationPermission = .granted
         case .denied, .restricted:
             locationPermission = .notGranted
         case .notDetermined:
             locationPermission = .notDetermined
         @unknown default:
-            print("Unknown location permission status")
+            break
         }
     }
     
@@ -55,29 +56,20 @@ class PermissionObserver: NSObject, ObservableObject, CLLocationManagerDelegate{
     }
     
     func checkCalendarPermission() {
-        let status = EKEventStore.authorizationStatus(for: .event)
-        print(status.rawValue)
+        let status = Permission.calendar(access: .full).status
         switch status {
-        case .authorized, .fullAccess:
-            print("Calender Permission Is given")
+        case .authorized:
             calendarPermission = .granted
-        case .denied, .restricted:
-            print("Calender Permission Is not given")
+        case .denied:
             calendarPermission = .notGranted
         case .notDetermined:
-            print("Calener Permission Is not determined")
             calendarPermission = .notDetermined
         default:
-            print("Unknown calendar permission status")
+            break
         }
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        
         checkLocationPermission()
     }
-
-    
-    
-
 }

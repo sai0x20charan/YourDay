@@ -24,7 +24,6 @@ struct HomeScreenView: View {
 
     var body: some View {
         NavigationView {
-            
             ScrollView {
                 LazyVStack() {
                     VStack(alignment: .leading) {
@@ -34,7 +33,7 @@ struct HomeScreenView: View {
                         Text(DateUtils().getDateInDDMMYYYY())
                             .bold()
                     }
-                    .frame(maxWidth: .infinity,alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
                     
                     WeatherCard(
@@ -44,94 +43,76 @@ struct HomeScreenView: View {
                         )
                     ) {
                         component.onEvent(
-                            intent: HomeEventRequestLocationPermission(
-                                showRationale: permissionObserver.locationPermission == .notGranted
-                            )
+                            event: HomeEventRequestLocationPermission.shared
                         )
                     }
                     
-                    CalenderCard(
-                        calenderState: Binding(
-                            get: { homeState?.calenderData },
+                    CalendarCard(
+                        calendarState: Binding(
+                            get: { homeState?.calendarData },
                             set: { _ in }
                         )
                     ) {
                         component.onEvent(
-                            intent: HomeEventRequestCalendarPermission(
-                                showRationale: permissionObserver.calendarPermission == .notGranted
-                            )
+                            event: HomeEventRequestCalendarPermission.shared
                         )
                     }
-                    .padding(.vertical,8)
+                    .padding(.vertical, 8)
                     
                     TodoCard(
                         onConnectClick: {
-                            component.onEvent(intent: HomeEventConnectTodoist.shared)
+                            component.onEvent(event: HomeEventConnectTodoist.shared)
                         },
                         todoState: Binding(
                             get: { homeState?.todoState },
                             set: { _ in }
                         ),
                         onTodoOpen: { link in
-                            component.onEvent(intent: Shared.HomeEventOnOpenLink(url: link))
-                            
+                            component.onEvent(event: Shared.HomeEventOnOpenLink(url: link))
                         }
                     )
                 }
             }
         }
-            .toolbar{
-                ToolbarItem{
-                    Menu("more",systemImage: "ellipsis.circle"){
-                        Button("Settings") {
-                            component.onEvent(intent: Shared.HomeEventOpenSettingsPage.shared)
-                        }
-                        
+        .toolbar {
+            ToolbarItem {
+                Menu("more", systemImage: "ellipsis.circle") {
+                    Button("Settings") {
+                        component.onEvent(event: Shared.HomeEventOpenSettingsPage.shared)
                     }
                 }
             }
-            .refreshable {
-                component.onEvent(intent: HomeEventRefreshData.shared)
-            }
-
-
-            
-        
+        }
+        .refreshable {
+            component.onEvent(event: HomeEventRefreshData.shared)
+        }
         .onAppear {
             observeState()
             observePermissionRequest()
-            
         }
         .onReceive(permissionObserver.$locationPermission) { permissionState in
             switch permissionState {
             case .granted:
-                component.onEvent(intent: HomeEventFetchWeather.shared)
+                component.onEvent(event: HomeEventFetchWeather.shared)
             default:
-                print("Not Granted")
+                break
             }
         }
         .onReceive(permissionObserver.$calendarPermission) { permissionState in
-            print(permissionState)
             switch permissionState {
             case .granted:
-                component.onEvent(intent: HomeEventFetchCalendarEvents.shared)
+                component.onEvent(event: HomeEventFetchCalendarEvents.shared)
             default:
-                print("Not Granted")
+                break
             }
         }
-        
     }
-    
     
     private func observePermissionRequest() {
         Task {
             for await effect in component.effects {
                 switch effect {
-                case is Shared.HomeViewEffectRequestCalenderPermission:
-                    getCalendarPermission()
-                case is Shared.HomeViewEffectRequestLocationPermission:
-                    getLocationPermission()
-                case let toastEffect as Shared.HomeViewEffectShowToast:
+                case let toastEffect as Shared.HomeEffectShowToast:
                     break
                 default:
                     break
@@ -139,60 +120,14 @@ struct HomeScreenView: View {
             }
         }
     }
-    
+
     private func observeState() {
         Task {
             for await state in component.state {
-                homeState = state
-            }
-        }
-    }
-    
-    
-    
-    private func getCalendarPermission() {
-        let eventStore = EKEventStore()
-        let status = EKEventStore.authorizationStatus(for: .event)
-        switch status {
-        case .notDetermined:
-            eventStore.requestAccess(to: .event) { granted, error in
-                if let error = error {
-                    print("Error requesting access: \(error.localizedDescription)")
-                    return
-                }
-                DispatchQueue.main.async {
-                    if granted {
-                        component.onEvent(intent: HomeEventFetchCalendarEvents.shared)
-                    } else {
-                        print("Calendar access denied")
-                    }
+                await MainActor.run {
+                    self.homeState = state
                 }
             }
-        case .authorized:
-            component.onEvent(intent: HomeEventFetchCalendarEvents.shared)
-        case .denied, .restricted:
-            component.onEvent(intent: HomeEventRequestCalendarPermission(showRationale: true))
-        @unknown default:
-            print("Unknown authorization status")
-        }
-    }
-    
-    private func getLocationPermission() {
-        let status = CLLocationManager.authorizationStatus()
-        switch status {
-        case .notDetermined:
-            CLLocationManager().requestWhenInUseAuthorization()
-        case .authorizedWhenInUse, .authorizedAlways:
-            component.onEvent(intent: HomeEventFetchWeather.shared)
-        case .denied, .restricted:
-            component.onEvent(intent: HomeEventRequestCalendarPermission(showRationale: false))
-        @unknown default:
-            print("Unknown authorization status")
         }
     }
 }
-
-
-
-
-
