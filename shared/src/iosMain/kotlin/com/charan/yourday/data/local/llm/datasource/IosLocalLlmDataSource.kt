@@ -43,7 +43,7 @@ class IosLocalLlmDataSource : LocalLlmDataSource {
     override suspend fun isModelDownloaded(model: AIModelInfo): Boolean {
 
 
-        return false
+        return true
     }
 
     override fun generateSummary(
@@ -54,7 +54,6 @@ class IosLocalLlmDataSource : LocalLlmDataSource {
         foundationModel.generateResponse(
             input,
             completion = { string, error ->
-
                 trySend(
                     LlmGenerationEvent.Streaming(
                         AIResponse(

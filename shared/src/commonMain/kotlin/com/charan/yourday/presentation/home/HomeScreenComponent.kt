@@ -86,10 +86,12 @@ class HomeScreenComponent(
             errorCode?.let { sendEffect(HomeEffect.ShowToast("Unable to authenticate")) }
         }
         refreshData()
+        println("hi")
+        generateSummary()
         lifecycle.subscribe(
             onResume = {
                 if (_state.value.aiResponseState.isModelDownloaded) {
-                    //generateSummary()
+
                 }
             }
         )
@@ -202,11 +204,13 @@ class HomeScreenComponent(
             )
         }
         val location = locationServiceRepository.getCurrentLocation()
+        println(location)
         if (location != null) {
             val lat = location.latitude ?: 0.0
             val long = location.longitude ?: 0.0
             weatherRepository.refreshWeather(lat, long)
                 .onFailure { error ->
+                    println(error)
                     _state.update {
                         it.copy(
                             weatherState = it.weatherState.copy(
@@ -373,6 +377,7 @@ class HomeScreenComponent(
     }
 
     private fun generateSummary(forceRefresh: Boolean = false) = coroutineScope.launch {
+        println("hi")
         if (localLLMRepo.isModelDownloaded()) {
             combine(
                 state.map { it.weatherState },
