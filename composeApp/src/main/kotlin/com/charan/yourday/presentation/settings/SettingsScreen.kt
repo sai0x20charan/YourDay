@@ -2,6 +2,7 @@ package com.charan.yourday.presentation.settings
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Scaffold
@@ -32,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.dp
 import com.charan.yourday.presentation.settings.components.SectionDivider
 import com.charan.yourday.presentation.settings.components.SectionHeader
 import com.charan.yourday.presentation.settings.components.SettingItem
@@ -150,7 +153,12 @@ fun SettingsScreen(
                                     )
                                 }
                             } else {
-                                LoadingIndicator()
+                                CircularProgressIndicator(
+                                    progress = {state.aiModelState.downloadProgress ?: 0f},
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .size(24.dp)
+                                )
                             }
                         }
                     }

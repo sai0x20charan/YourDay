@@ -13,13 +13,13 @@ data class AIModelInfo(
 )
 
 object AIModels {
-    const val DEFAULT_MODEL_ID = "lfm2.5-230m-q4_k_m"
+    const val DEFAULT_MODEL_ID = "qwen3.5-0.8b-q4_k_m"
 
     val AVAILABLE_MODELS: List<AIModelInfo> = listOf(
         AIModelInfo(
             id = "lfm2.5-230m-q4_k_m",
             name = "LFM2.5 230M Q4_K_M",
-            url = "https://huggingface.co/LiquidCloud-GGUF/LFM-2.5-230M-Instruct-GGUF/resolve/main/LFM-2.5-230M-Instruct-Q4_K_M.gguf",
+            url = "https://huggingface.co/LiquidAI/LFM2.5-230M-GGUF/resolve/main/LFM2.5-230M-Q4_K_M.gguf",
             memoryBytes = 350_000_000L,
             downloadBytes = 160_512_800L,
             supportsThinking = false

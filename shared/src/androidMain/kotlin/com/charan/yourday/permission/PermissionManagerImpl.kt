@@ -18,9 +18,21 @@ class PermissionManagerImpl(
     }
 
     override fun isPermissionGranted(permissions: PermissionType): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context, getPlatformPermission(permissions)
-        ) == PackageManager.PERMISSION_GRANTED
+        return when (permissions) {
+            PermissionType.CALENDAR -> {
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.READ_CALENDAR
+                ) == PackageManager.PERMISSION_GRANTED
+            }
+            PermissionType.LOCATION -> {
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            }
+        }
     }
 
     override fun requestPermission(permissions: PermissionType) {
@@ -40,12 +52,5 @@ class PermissionManagerImpl(
 
     override fun observeCalendarPermission(): Flow<Boolean> {
         return MutableStateFlow(false)
-    }
-
-    private fun getPlatformPermission(permissions: PermissionType): String {
-        return when (permissions) {
-            PermissionType.CALENDAR -> Manifest.permission.READ_CALENDAR
-            PermissionType.LOCATION -> Manifest.permission.ACCESS_FINE_LOCATION
-        }
     }
 }

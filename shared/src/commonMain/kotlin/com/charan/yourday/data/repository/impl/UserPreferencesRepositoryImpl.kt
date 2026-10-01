@@ -48,7 +48,7 @@ class UserPreferencesRepositoryImpl(
 
     override val selectedAIModelId: Flow<String>
         get() = dataStore.data.map { preferences ->
-            preferences[SELECTED_AI_MODEL_ID_KEY] ?: AIModels.DEFAULT_MODEL_ID
+           AIModels.DEFAULT_MODEL_ID
         }
 
     override suspend fun setWeatherUnits(weatherUnits: String) {

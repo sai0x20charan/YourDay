@@ -70,14 +70,8 @@ class LocalLLMRepositoryImpl(
     ): Flow<LlmGenerationEvent> = flow {
         val model = selectedModel.first()
 
-        if (!forceRefresh) {
-            cachedSummary.first()?.takeIf { it.isFresh() }?.let { cached ->
-                emit(LlmGenerationEvent.Completed(cached))
-                return@flow
-            }
-        }
-
         localLlmDataSource.generateSummary(model, input).collect { event ->
+            println(event)
             if (event is LlmGenerationEvent.Completed) {
                 val response = event.response.copy(
                     generatedAtEpochMillis = DateUtils.getCurrentTimeInMillis()

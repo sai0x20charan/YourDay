@@ -18,12 +18,14 @@ import com.runanywhere.sdk.public.api.ModelRegistration
 import com.runanywhere.sdk.public.api.llm
 import com.runanywhere.sdk.public.api.models
 import com.runanywhere.sdk.public.extensions.Models.isDownloadedOnDisk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOn
 
 class RunAnywhereLlmDataSource(
     private val context: Context
@@ -64,6 +66,7 @@ class RunAnywhereLlmDataSource(
     }
 
     override fun downloadModel(model: AIModelInfo): Flow<LlmDownloadStatus> = callbackFlow {
+        registerModel(model)
         RunAnywhere.models.download(model.id).collectLatest { event ->
             val status = when (event) {
                 is DownloadEvent.Cancelled -> LlmDownloadStatus(
@@ -105,7 +108,7 @@ class RunAnywhereLlmDataSource(
             }
         }
         awaitClose { this.cancel() }
-    }
+    }.flowOn(Dispatchers.IO)
 
     override suspend fun isModelDownloaded(model: AIModelInfo): Boolean {
         val registered = RunAnywhere.models.get(model.id) ?: return false
@@ -195,7 +198,7 @@ class RunAnywhereLlmDataSource(
     override suspend fun deleteModel(model: AIModelInfo) {
         registerModel(model)
         checkNotNull(RunAnywhere.models.get(model.id)) { "Model not found" }
-        runCatching { RunAnywhere.models.unload(model.id) }
+
         RunAnywhere.models.delete(model.id)
     }
 

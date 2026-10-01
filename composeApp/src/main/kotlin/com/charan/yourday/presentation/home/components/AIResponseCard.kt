@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
@@ -62,6 +61,8 @@ fun AIResponseCard(
     modifier: Modifier = Modifier,
     isThinking : Boolean = false
 ) {
+    val richTextState = rememberRichTextState()
+    richTextState.setMarkdown(aiResponse)
     ContentElevatedCard(
         isLoading = false,
         hasError = null,
@@ -84,10 +85,10 @@ fun AIResponseCard(
                 if (text.isBlank() && isGenerating) {
                     ShimmerLines()
                 } else {
-                    BasicText(
-                        text = aiResponse,
+                    RichText(
+                        state = richTextState,
                         style = MaterialTheme.typography.bodyLarge,
-
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }

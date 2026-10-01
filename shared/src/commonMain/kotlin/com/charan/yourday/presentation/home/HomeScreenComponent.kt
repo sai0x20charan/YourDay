@@ -86,12 +86,12 @@ class HomeScreenComponent(
             errorCode?.let { sendEffect(HomeEffect.ShowToast("Unable to authenticate")) }
         }
         refreshData()
-        println("hi")
         generateSummary()
+
         lifecycle.subscribe(
             onResume = {
                 if (_state.value.aiResponseState.isModelDownloaded) {
-
+                    generateSummary()
                 }
             }
         )
@@ -132,8 +132,12 @@ class HomeScreenComponent(
 
     private fun refreshData() {
         refreshDateAndGreetings()
-        fetchLocationAndWeather()
-        fetchCalendarEvents()
+        if (_isLocationPermissionGranted.value) {
+            fetchLocationAndWeather()
+        }
+        if (_isCalendarPermissionGranted.value) {
+            fetchCalendarEvents()
+        }
         refreshTodoTasks()
         updateDropdownMenuState(false)
     }
@@ -195,6 +199,9 @@ class HomeScreenComponent(
     }
 
     private fun fetchLocationAndWeather() = coroutineScope.launch {
+        if (!_isLocationPermissionGranted.value) {
+            return@launch
+        }
         _state.update {
             it.copy(
                 weatherState = it.weatherState.copy(
@@ -203,7 +210,7 @@ class HomeScreenComponent(
                 )
             )
         }
-        val location = locationServiceRepository.getCurrentLocation()
+        val location = runCatching { locationServiceRepository.getCurrentLocation() }.getOrNull()
         println(location)
         if (location != null) {
             val lat = location.latitude ?: 0.0
@@ -309,7 +316,7 @@ class HomeScreenComponent(
 
     private fun fetchCalendarEvents() = coroutineScope.launch {
         if (_isCalendarPermissionGranted.value) {
-            val events = calendarEventsRepository.getCalendarEvents()
+            val events = runCatching { calendarEventsRepository.getCalendarEvents() }.getOrDefault(emptyList())
             _state.update {
                 it.copy(
                     calendarData = it.calendarData.copy(
@@ -394,7 +401,7 @@ class HomeScreenComponent(
 
             localLLMRepo.generateDaySummary(
                 input = _state.value.generateSummaryPrompt(),
-                forceRefresh = forceRefresh
+                forceRefresh = true
             )
                 .collect { event ->
                     when (event) {
@@ -461,19 +468,7 @@ class HomeScreenComponent(
                     )
                 }
             }
-        localLLMRepo.cachedSummary.collectLatest { cached ->
-            if (cached == null) return@collectLatest
-            updateAiResponseState { current ->
-                if (current.isGenerating) return@updateAiResponseState current
-                current.copy(
-                    isModelDownloaded = true,
-                    aiResponse = cached.aiResponse,
-                    thinkingResponse = cached.thinkingResponse,
-                    modelName = cached.modelName,
-                    isThinking = cached.isThinking
-                )
-            }
-        }
+
     }
 
     private inline fun updateAiResponseState(transform: (AIResponseState) -> AIResponseState) {

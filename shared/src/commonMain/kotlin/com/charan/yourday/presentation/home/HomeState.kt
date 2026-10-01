@@ -69,7 +69,7 @@ data class TodoDataState(
 data class AIResponseState(
     val isModelDownloaded: Boolean = false,
     val modelName: String? = null,
-    val isGenerating: Boolean = false,
+    val isGenerating: Boolean = true,
     val aiResponse: String? = null,
     val error: String? = null,
     val thinkingResponse: String? = null,
