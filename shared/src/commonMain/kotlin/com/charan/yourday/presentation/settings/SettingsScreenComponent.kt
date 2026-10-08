@@ -3,6 +3,7 @@ package com.charan.yourday.presentation.settings
 import com.arkivanov.decompose.ComponentContext
 import com.charan.yourday.data.repository.TodoistRepository
 import com.charan.yourday.data.repository.UserPreferencesRepository
+import com.charan.yourday.presentation.common.DropDownItem
 import com.charan.yourday.utils.appVersion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.CoroutineScope
@@ -15,25 +16,25 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-class SettingsScreenComponent (
+class SettingsScreenComponent(
     componentContext: ComponentContext,
-    val onBackClick : () -> Unit,
-    val onLicenseClick : () -> Unit ={},
-
-) : KoinComponent, ComponentContext by componentContext{
+    val onBackClick: () -> Unit,
+    val onLicenseClick: () -> Unit = {},
+) : KoinComponent, ComponentContext by componentContext {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private val userPreferencesRepository : UserPreferencesRepository = get()
+    private val userPreferencesRepository: UserPreferencesRepository = get()
     private val todoistRepository: TodoistRepository = get()
 
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState = _settingsState.asStateFlow()
+
     init {
         getSetTemperatureUnits()
         isTodoConnected()
         getAppVersion()
     }
 
-    private fun getSetTemperatureUnits() = coroutineScope.launch{
+    private fun getSetTemperatureUnits() = coroutineScope.launch {
         userPreferencesRepository.weatherUnits.collectLatest {
             updateSettingsState(
                 weatherUnits = it
@@ -46,15 +47,18 @@ class SettingsScreenComponent (
             appVersion = appVersion()
         )
     }
-    private fun setTemperature(weatherUnits : String) = coroutineScope.launch {
-       userPreferencesRepository.setWeatherUnits(weatherUnits)
+
+    private fun setTemperature(weatherUnits: String) = coroutineScope.launch {
+        userPreferencesRepository.setWeatherUnits(weatherUnits)
     }
+
     private fun deleteTodoistToken() = coroutineScope.launch {
         userPreferencesRepository.clearTodoistAccessToken()
     }
+
     private fun isTodoConnected() = coroutineScope.launch {
         userPreferencesRepository.todoistAccessToken.collectLatest {
-            if(it !=null){
+            if (it != null) {
                 updateSettingsState(
                     isTodoistConnected = true
                 )
@@ -64,20 +68,30 @@ class SettingsScreenComponent (
                 )
             }
         }
-
     }
 
+    private fun updateDropdownMenuState(show: Boolean) {
+        _settingsState.update {
+            it.copy(
+                showDropDown = show
+            )
+        }
+    }
 
-    fun onEvent(event : SettingsEvents) = coroutineScope.launch{
-        when(event){
+    fun onEvent(event: SettingsEvents) = coroutineScope.launch {
+        when (event) {
             is SettingsEvents.OnChangeWeatherUnits -> {
                 setTemperature(event.weatherUnit)
             }
 
+            is SettingsEvents.ShowDropdownMenu -> {
+                updateDropdownMenuState(event.show)
+            }
+
             SettingsEvents.TodoConnect -> {
-                if(_settingsState.value.isTodoistConnected==false){
+                if (_settingsState.value.isTodoistConnected == false) {
                     todoistRepository.requestAuthorization()
-                } else{
+                } else {
                     deleteTodoistToken()
                 }
             }
@@ -88,23 +102,23 @@ class SettingsScreenComponent (
 
             SettingsEvents.OnLicenseNavigate -> {
                 onLicenseClick()
-
             }
         }
     }
 
     private fun updateSettingsState(
-        weatherUnits: String? =null,
-        isTodoistConnected : Boolean? =null,
-        appVersion : String?=null
+        weatherUnits: String? = null,
+        isTodoistConnected: Boolean? = null,
+        appVersion: String? = null,
+        dropDownItems: List<DropDownItem>? = null
     ) {
         _settingsState.update {
             it.copy(
                 weatherUnits = weatherUnits ?: it.weatherUnits,
-                isTodoistConnected =  isTodoistConnected ?: it.isTodoistConnected,
-                appVersion = appVersion ?: it.appVersion
+                isTodoistConnected = isTodoistConnected ?: it.isTodoistConnected,
+                appVersion = appVersion ?: it.appVersion,
+                dropDownItems = dropDownItems ?: it.dropDownItems
             )
-
         }
     }
 }

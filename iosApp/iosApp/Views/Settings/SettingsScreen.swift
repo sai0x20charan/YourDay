@@ -14,37 +14,32 @@ struct SettingsScreen: View {
     @State var weatherUnit : String?
     var body: some View {
         List {
-                Section(
-                    header: Text("Weather")
-                        
-                ){
-                    Picker("Temperature Units", selection: Binding(
-                        get: { state?.weatherUnits ?? "" },
-                        set: { newValue in
-                            component.onEvent(event: Shared.SettingsEvents.OnChangeWeatherUnits(weatherUnit: newValue))
-                        }
-                    )) {
-                        ForEach(Shared.WeatherUnitsEnums.allCases, id: \.self) { item in
-                            
-                            let unitsString = switch item {
-                            case .c: WeatherUnits.shared.C
-                            case .f: WeatherUnits.shared.F
-                            }
-
-                            Text(unitsString).tag(unitsString)
-                        }
-                    }
-                    
-                    .pickerStyle(MenuPickerStyle())
-                    .listRowInsets(.init(top: 0, leading: 20, bottom: 0, trailing: 20))
-                    .onChange(of: state?.weatherUnits ?? "") { newValue in
-                        component.onEvent(event: Shared.SettingsEvents.OnChangeWeatherUnits(weatherUnit:newValue))
-                    }
-                    
-                    
-                }
             Section(
-                header: Text("Tasks")
+                header: Text("Preferences")
+            ){
+                Picker("Temperature Units", selection: Binding(
+                    get: { state?.weatherUnits ?? "" },
+                    set: { newValue in
+                        component.onEvent(event: Shared.SettingsEvents.OnChangeWeatherUnits(weatherUnit: newValue))
+                    }
+                )) {
+                    ForEach(Shared.WeatherUnitsEnums.allCases, id: \.self) { item in
+                        let unitsString = switch item {
+                        case .c: WeatherUnits.shared.C
+                        case .f: WeatherUnits.shared.F
+                        }
+
+                        Text(unitsString).tag(unitsString)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+                .listRowInsets(.init(top: 0, leading: 20, bottom: 0, trailing: 20))
+                .onChange(of: state?.weatherUnits ?? "") { newValue in
+                    component.onEvent(event: Shared.SettingsEvents.OnChangeWeatherUnits(weatherUnit:newValue))
+                }
+            }
+            Section(
+                header: Text("Integrations")
             ) {
                 HStack {
                     Text("Todoist Integration")
@@ -53,31 +48,22 @@ struct SettingsScreen: View {
                         component.onEvent(event: Shared.SettingsEvents.TodoConnect.shared)
                     }
                 }
-                
             }
             Section(
-                header: Text("About App")){
-                    HStack{
-                        Text("App version")
-                        Spacer()
-                        Text(state?.appVersion ?? "")
-                    }
-                    
+                header: Text("About")
+            ) {
+                HStack {
+                    Text("App version")
+                    Spacer()
+                    Text(state?.appVersion ?? "")
                 }
-                    
-                    
-                
-                
-                
-
             }
+        }
         .onAppear{
             observeState()
         }
-            .toolbarRole(.editor)
-            .navigationTitle("Settings")
-
-        
+        .toolbarRole(.editor)
+        .navigationTitle("Settings")
     }
     private func observeState() {
         Task {
@@ -88,4 +74,3 @@ struct SettingsScreen: View {
         }
     }
 }
-

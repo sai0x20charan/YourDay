@@ -15,7 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
-
+import dev.icerock.moko.resources.ImageResource
+import dev.icerock.moko.resources.compose.painterResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -23,37 +24,49 @@ fun CustomDropDown(
     items: List<DropDownItem>,
     selectedItem: DropDownItem? = null,
     onItemSelected: (DropDownItem, Int) -> Unit,
-    isExpanded : Boolean = false,
-    onDismiss : () -> Unit = { },
-    containerColor : Color = MaterialTheme.colorScheme.surfaceContainerHigh
+    isExpanded: Boolean = false,
+    onDismiss: () -> Unit = { },
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
     DropdownMenuPopup(
         expanded = isExpanded,
         onDismissRequest = {
             onDismiss()
         },
-
-        ) {
+    ) {
         DropdownMenuGroup(
             shapes = MenuDefaults.groupShape(0, 1),
             containerColor = containerColor
-
         ) {
             items.fastForEachIndexed { index, item ->
                 DropdownMenuItem(
                     text = {
                         Text(text = item.title)
                     },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                            )
+                    trailingIcon = item.icon?.let { icon ->
+                        {
+                            when (icon) {
+                                is ImageVector -> {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                is ImageResource -> {
+                                    Icon(
+                                        painter = painterResource(icon),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                else -> {}
+                            }
+                        }
                     },
                     shapes = MenuDefaults.itemShape(index, items.size),
                     onCheckedChange = {
-                        onItemSelected(item,index)
+                        onItemSelected(item, index)
                     },
                     checked = item == selectedItem,
                     colors = MenuDefaults.selectableItemColors().copy(
@@ -62,13 +75,5 @@ fun CustomDropDown(
                 )
             }
         }
-
     }
-
-
 }
-
-data class DropDownItem(
-    val title : String,
-    val icon : ImageVector
-)
