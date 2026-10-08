@@ -72,7 +72,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.0.1"
     }
     packaging {
         resources {
@@ -127,7 +127,7 @@ android {
                 variant.outputs.forEach { output ->
                     if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
                         val name = variant.name
-                        val versionName = android.defaultConfig.versionName ?: "1.0"
+                        val versionName = android.defaultConfig.versionName ?: "0.0.1"
                         output.outputFileName.set("YourDay-$name-$versionName.apk")
                     }
                 }
