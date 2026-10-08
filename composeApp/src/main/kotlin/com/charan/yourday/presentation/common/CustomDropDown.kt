@@ -23,7 +23,7 @@ import dev.icerock.moko.resources.compose.painterResource
 fun CustomDropDown(
     items: List<DropDownItem>,
     selectedItem: DropDownItem? = null,
-    onItemSelected: (DropDownItem, Int) -> Unit,
+    onItemSelected: ((DropDownItem, Int) -> Unit)? = null,
     isExpanded: Boolean = false,
     onDismiss: () -> Unit = { },
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -66,7 +66,8 @@ fun CustomDropDown(
                     },
                     shapes = MenuDefaults.itemShape(index, items.size),
                     onCheckedChange = {
-                        onItemSelected(item, index)
+                        item.onClick?.invoke()
+                        onItemSelected?.invoke(item, index)
                     },
                     checked = item == selectedItem,
                     colors = MenuDefaults.selectableItemColors().copy(

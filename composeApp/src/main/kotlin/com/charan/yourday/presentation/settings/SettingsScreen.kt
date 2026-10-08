@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Info
@@ -14,9 +13,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.charan.yourday.MR
 import com.charan.yourday.Todoist
 import com.charan.yourday.presentation.common.CustomDropDown
+import com.charan.yourday.presentation.common.CustomLargeFlexibleTopAppBar
 import com.charan.yourday.presentation.common.CustomListItem
 import com.charan.yourday.presentation.common.toScreenContentPadding
 import com.charan.yourday.presentation.settings.components.SectionHeader
@@ -48,13 +45,10 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
+            CustomLargeFlexibleTopAppBar(
                 title = { Text("Settings") },
-                navigationIcon = {
-                    IconButton(onClick = { component.onEvent(SettingsEvents.onBack) }, shapes = IconButtonDefaults.shapes()) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
+                showBackButton = true,
+                onBackClick = { component.onEvent(SettingsEvents.onBack) },
                 scrollBehavior = scrollBehavior
             )
         }

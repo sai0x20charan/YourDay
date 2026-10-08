@@ -7,12 +7,10 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,8 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.charan.yourday.presentation.common.CustomDropDown
+import com.charan.yourday.presentation.common.CustomLargeFlexibleTopAppBar
 import com.charan.yourday.presentation.common.DropDownItem
+import com.charan.yourday.presentation.common.toScreenContentPadding
 import com.charan.yourday.presentation.home.components.CalendarCard
 import com.charan.yourday.presentation.home.components.TodoCard
 import com.charan.yourday.presentation.home.components.WeatherCard
@@ -72,18 +72,29 @@ fun HomeScreen(
     }
     val isPulledDown by remember {
         derivedStateOf {
-            pullToRefreshState.progress.dp > 0.dp
+            pullToRefreshState.progress.dp > 0.dp || state.isRefreshing
         }
     }
+    val dropdownItems = remember(component) {
+        listOf(
+            DropDownItem(
+                title = "Settings",
+                icon = Icons.Rounded.Settings,
+                onClick = { component.onEvent(HomeEvent.OpenSettingsPage) }
+            ),
+            DropDownItem(
+                title = "Refresh",
+                icon = Icons.Rounded.Refresh,
+                onClick = { component.onEvent(HomeEvent.RefreshData) }
+            ),
+        )
+    }
+
     Scaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = {
-                    Text(state.greetings)
-                },
-                subtitle = {
-                    Text(state.currentDateTime)
-                },
+            CustomLargeFlexibleTopAppBar(
+                title = { Text(state.greetings) },
+                subtitle = { Text(state.currentDateTime) },
                 scrollBehavior = scroll,
                 actions = {
                     IconButton(
@@ -96,12 +107,6 @@ fun HomeScreen(
                     }
                     CustomDropDown(
                         items = dropdownItems,
-                        onItemSelected = { _, index ->
-                            when (index) {
-                                0 -> component.onEvent(HomeEvent.OpenSettingsPage)
-                                1 -> component.onEvent(HomeEvent.RefreshData)
-                            }
-                        },
                         isExpanded = state.showDropDown,
                         onDismiss = {
                             component.onEvent(HomeEvent.ShowDropdownMenu(false))
@@ -112,83 +117,70 @@ fun HomeScreen(
         },
         modifier = Modifier
     ) { padding ->
-        Box(
+
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .pullRefresh(pullToRefreshState)
+                .nestedScroll(scroll.nestedScrollConnection)
+                .pullRefresh(pullToRefreshState),
+            state = listState,
+            contentPadding = padding.toScreenContentPadding()
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-                    .nestedScroll(scroll.nestedScrollConnection),
-                state = listState,
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    AnimatedVisibility(
-                        visible = isPulledDown,
-                        enter = expandVertically() + scaleIn(),
-                        exit = shrinkVertically() + scaleOut()
+            item {
+                AnimatedVisibility(
+                    visible = isPulledDown,
+                    enter = expandVertically() + scaleIn(),
+                    exit = shrinkVertically() + scaleOut(),
+                    modifier = Modifier.zIndex(1f)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp, bottom = 8.dp),
+                        horizontalArrangement = Arrangement.Center,
                     ) {
-                        Row(
+                        CircularWavyProgressIndicator(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .offset(y = 20.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            CircularWavyProgressIndicator(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .animateContentSize(),
-                                progress = {
-                                    if (isThresholdReached) 1f else pullToRefreshState.progress.coerceIn(0f, 1f)
-                                },
-                            )
-                        }
+                                .size(40.dp)
+                                .animateContentSize(),
+                            progress = {
+                                if (isThresholdReached || state.isRefreshing) 1f else pullToRefreshState.progress.coerceIn(0f, 1f)
+                            },
+                        )
                     }
                 }
-                item {
-                    WeatherCard(
-                        weatherState = state.weatherState,
-                        grantPermission = {
-                            component.onEvent(
-                                HomeEvent.RequestLocationPermission
-                            )
-                        },
-                        scrollToCurrentTimeIndex = state.weatherState.scrollToForecastCurrentTimeIndex
-                    )
-                    Spacer(Modifier.padding(vertical = 10.dp))
-                    CalendarCard(
-                        calendarState = state.calendarData,
-                        grantPermission = {
-                            component.onEvent(
-                                HomeEvent.RequestCalendarPermission
-                            )
-                        },
-                    )
-                    Spacer(Modifier.padding(vertical = 10.dp))
+            }
+            item {
+                WeatherCard(
+                    weatherState = state.weatherState,
+                    grantPermission = {
+                        component.onEvent(
+                            HomeEvent.RequestLocationPermission
+                        )
+                    },
+                    scrollToCurrentTimeIndex = state.weatherState.scrollToForecastCurrentTimeIndex
+                )
+                Spacer(Modifier.padding(vertical = 10.dp))
+                CalendarCard(
+                    calendarState = state.calendarData,
+                    grantPermission = {
+                        component.onEvent(
+                            HomeEvent.RequestCalendarPermission
+                        )
+                    },
+                )
+                Spacer(Modifier.padding(vertical = 10.dp))
 
-                    TodoCard(
-                        todoState = state.todoState,
-                        onConnect = {
-                            component.onEvent(HomeEvent.ConnectTodoist)
-                        },
-                        onTodoOpen = { link ->
-                            component.onEvent(HomeEvent.OnOpenLink(link))
-                        }
-                    )
-                }
+                TodoCard(
+                    todoState = state.todoState,
+                    onConnect = {
+                        component.onEvent(HomeEvent.ConnectTodoist)
+                    },
+                    onTodoOpen = { link ->
+                        component.onEvent(HomeEvent.OnOpenLink(link))
+                    }
+                )
             }
         }
     }
 }
-
-private val dropdownItems = listOf(
-    DropDownItem("Settings", Icons.Rounded.Settings),
-    DropDownItem("Refresh", Icons.Rounded.Refresh),
-)
