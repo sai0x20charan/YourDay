@@ -3,7 +3,9 @@ package com.charan.yourday.data.repository.impl
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.provider.CalendarContract
+import androidx.annotation.RequiresApi
 import com.charan.yourday.data.model.CalendarItems
 import com.charan.yourday.data.repository.CalendarEventsRepository
 import com.charan.yourday.utils.DateUtils
@@ -11,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CalendarEventsRepositoryImpl(val context: Context) : CalendarEventsRepository {
+    @RequiresApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @SuppressLint("Range")
     override suspend fun getCalendarEvents(): List<CalendarItems> = withContext(Dispatchers.IO) {
         val currentTime = DateUtils.getCurrentTimeInMillis()
@@ -28,10 +31,14 @@ class CalendarEventsRepositoryImpl(val context: Context) : CalendarEventsReposit
             CalendarContract.Events.DISPLAY_COLOR
         )
         val cursor = context.contentResolver.query(uri, projection, null, null, null)
+
         cursor?.use {
             while (it.moveToNext()) {
+
                 val startTime = it.getLong(it.getColumnIndex(CalendarContract.Events.DTSTART))
+
                 val endTime = it.getLong(it.getColumnIndex(CalendarContract.Events.DTEND))
+
                 if ((startTime in stateDayTime..endDayTime) ||
                     (endTime in stateDayTime..endDayTime) ||
                     (currentTime in startTime..endTime)) {
@@ -39,7 +46,7 @@ class CalendarEventsRepositoryImpl(val context: Context) : CalendarEventsReposit
                         eventId = it.getString(it.getColumnIndex(CalendarContract.Events._ID)),
                         title = it.getString(it.getColumnIndex(CalendarContract.Events.TITLE)),
                         description = it.getString(it.getColumnIndex(CalendarContract.Events.DESCRIPTION)),
-                        stateTime = stateDayTime,
+                        stateTime = startTime,
                         endTime = endTime,
                         calendarColor = it.getString(it.getColumnIndex(CalendarContract.Events.DISPLAY_COLOR)),
                     )

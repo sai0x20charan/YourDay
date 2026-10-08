@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.charan.yourday.data.model.CalendarItems
+import com.charan.yourday.utils.DateUtils
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -39,14 +40,14 @@ fun EventItem(event: CalendarItems) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = event.getEventName(),
+                    text = event.title ?: "",
                     style = MaterialTheme.typography.bodyLarge,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "${event.getFormatedStartTime()} - ${event.getFormatedEndTime()}",
+                    text = "${event.stateTime?.let { DateUtils.getTimeFromTimeMillis(it) } ?: ""} - ${event.endTime?.let { DateUtils.getTimeFromTimeMillis(it) } ?: ""}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
